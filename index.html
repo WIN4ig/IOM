@@ -51,11 +51,11 @@
   const searchEl = document.getElementById('search');
   const metaEl = document.getElementById('meta');
 
-  let raw = { items: [], specialties: [], updated_at: null };
+  let items = [];
   try {
     const res = await fetch(dataUrl);
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    raw = await res.json();
+    items = await res.json(); // Ожидаем массив объектов
   } catch (e) {
     listEl.innerHTML = '';
     emptyEl.style.display = 'block';
@@ -65,32 +65,31 @@
   }
 
   // Заполняем селект специальностей
-  const specs = (raw.specialties && raw.specialties.length ? raw.specialties : Array.from(new Set(raw.items.map(i => i.specialty).filter(Boolean)))).sort((a,b)=>a.localeCompare(b,'ru'));
-  specEl.innerHTML = `<option value="">Все специальности</option>` + specs.map(s => `<option>${s}</option>`).join('');
+  const specialties = Array.from(new Set(items.map(i => i.specialty).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'ru'));
+  specEl.innerHTML = `<option value="">Все специальности</option>` + specialties.map(s => `<option>${s}</option>`).join('');
 
-  // Метаданные
-  const d = raw.updated_at ? new Date(raw.updated_at) : null;
-  metaEl.textContent = `${raw.items.length} записей • обновлено: ${d ? d.toLocaleString('ru-RU') : '—'}`;
+  // Метаданные (дата обновления фиксирована, так как не в JSON)
+  metaEl.textContent = `${items.length} записей • обновлено: ежедневно в 05:00 (CEST)`;
 
-  function render(){
+  function render() {
     const q = (searchEl.value || '').trim().toLowerCase();
     const spec = specEl.value;
-    let items = raw.items;
-    if (spec) items = items.filter(i => i.specialty === spec);
+    let filteredItems = items;
+    if (spec) filteredItems = filteredItems.filter(i => i.specialty === spec);
     if (q) {
-      items = items.filter(i =>
+      filteredItems = filteredItems.filter(i =>
         (i.iom && i.iom.toLowerCase().includes(q)) ||
         (i.position && i.position.toLowerCase().includes(q))
       );
     }
-    listEl.innerHTML = items.map(i => `
+    listEl.innerHTML = filteredItems.map(i => `
       <div class="item">
         <div class="iom">${i.iom || '—'}</div>
         <div class="pos">${i.position || '—'}</div>
         <div class="pos" style="margin-top:6px"><span style="opacity:.6">Специальность:</span> ${i.specialty || '—'}</div>
       </div>
     `).join('');
-    emptyEl.style.display = items.length ? 'none' : 'block';
+    emptyEl.style.display = filteredItems.length ? 'none' : 'block';
   }
 
   specEl.addEventListener('change', render);
