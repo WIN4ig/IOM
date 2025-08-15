@@ -38,16 +38,22 @@ jobs:
               print("Download failed:", e, file=sys.stderr)
               sys.exit(1)
 
-          # Читаем все листы, объединяем
+          # Читаем все листы, выводим инфо
           xls = pd.ExcelFile(tmp)
+          print("Sheets found:", xls.sheet_names)
+
           frames = []
           for name in xls.sheet_names:
               try:
-                  df = xls.parse(name)
+                  df = xls.parse(name, header=0)  # заголовки берём из первой строки
+                  print(f"\n--- Sheet: {name} ---")
+                  print("Columns:", df.columns.tolist())
+                  print(df.head(5))  # первые 5 строк для понимания структуры
                   if not df.empty:
                       frames.append(df)
-              except Exception:
-                  pass
+              except Exception as e:
+                  print(f"Error reading sheet {name}:", e)
+
           if not frames:
               print("No data in workbook", file=sys.stderr)
               sys.exit(1)
