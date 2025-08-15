@@ -16,7 +16,12 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; background: var(--bg); color: var(--text); }
+    body { 
+      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; 
+      background: var(--bg); 
+      color: var(--text); 
+      overflow: hidden; /* Отключаем основной скролл */
+    }
     .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 80px 16px; }
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
@@ -25,6 +30,7 @@
     .input:focus, select:focus { border-color: var(--accent); }
     .meta { font-size: 13px; color: var(--muted); margin: 8px 0 16px; }
     .results { font-size: 14px; color: var(--muted); margin-bottom: 12px; display: none; }
+    .results strong { color: var(--text); font-weight: bold; }
     .list { 
       display: grid; 
       gap: 12px; 
@@ -32,11 +38,10 @@
       max-height: calc(100vh - 300px); 
       overflow-y: auto; 
       padding-bottom: 10px; 
-      /* Стили скролл-бара */
-      scrollbar-width: thin; /* Firefox */
-      scrollbar-color: var(--muted) var(--card); /* Firefox */
+      scrollbar-width: thin; 
+      scrollbar-color: var(--muted) var(--card); 
     }
-    .list::-webkit-scrollbar { width: 8px; } /* WebKit */
+    .list::-webkit-scrollbar { width: 8px; }
     .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; }
     .list::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 4px; }
     .list::-webkit-scrollbar-thumb:hover { background: var(--accent); }
@@ -109,7 +114,7 @@
 <body>
   <div class="wrap">
     <h1>Рубрикатор: ИОМ-КР / Должности</h1>
-    <div class="sub">Выберите врачебную специальность — ниже появится список «<strong>Название ИОМ-КР</strong> / <strong>Должность</strong>» из официального Excel.</div>
+    <div class="sub">Выберите врачебную специальность или воспользуйтесь поиском по специальности/ИОМ</div>
 
     <div class="controls">
       <input id="search" class="input" placeholder="Поиск по ИОМ/Должности…" />
@@ -196,7 +201,7 @@
     // Показываем количество найденных ИОМов
     if (q || spec) {
       resultsEl.style.display = 'block';
-      resultsEl.textContent = `Найдено: ${items.length} ИОМов`;
+      resultsEl.innerHTML = `<strong>Найдено:</strong> ${items.length} <strong>ИОМов</strong>`;
     } else {
       resultsEl.style.display = 'none';
     }
