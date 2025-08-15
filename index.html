@@ -24,14 +24,22 @@
     .input, select { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; }
     .input:focus, select:focus { border-color: var(--accent); }
     .meta { font-size: 13px; color: var(--muted); margin: 8px 0 16px; }
+    .results { font-size: 14px; color: var(--muted); margin-bottom: 12px; display: none; }
     .list { 
       display: grid; 
       gap: 12px; 
-      min-height: calc(100vh - 300px); /* Фиксированная высота */
+      min-height: calc(100vh - 300px); 
       max-height: calc(100vh - 300px); 
-      overflow-y: auto; /* Прокрутка внутри списка */
+      overflow-y: auto; 
       padding-bottom: 10px; 
+      /* Стили скролл-бара */
+      scrollbar-width: thin; /* Firefox */
+      scrollbar-color: var(--muted) var(--card); /* Firefox */
     }
+    .list::-webkit-scrollbar { width: 8px; } /* WebKit */
+    .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; }
+    .list::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 4px; }
+    .list::-webkit-scrollbar-thumb:hover { background: var(--accent); }
     .item { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 14px; box-shadow: 0 2px 4px var(--shadow); transition: transform 0.2s, box-shadow 0.2s; }
     .item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); }
     .iom { font-weight: 600; font-size: 16px; }
@@ -59,21 +67,25 @@
     .page-btn:hover:not(:disabled) { background: #1e2740; }
     .to-top { 
       position: fixed; 
-      bottom: 80px; 
+      bottom: 90px; 
       right: 20px; 
       background: var(--card); 
       border: 1px solid var(--border); 
       color: var(--text); 
-      padding: 10px; 
+      width: 40px; 
+      height: 40px; 
       border-radius: 50%; 
       cursor: pointer; 
       display: none; 
       z-index: 10; 
       box-shadow: 0 2px 4px var(--shadow); 
-      transition: opacity 0.3s; 
+      transition: opacity 0.3s, transform 0.2s; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
     }
-    .to-top.visible { display: block; opacity: 1; }
-    .to-top:hover { background: #1e2740; }
+    .to-top.visible { display: flex; opacity: 1; }
+    .to-top:hover { background: #1e2740; transform: scale(1.1); }
 
     /* Responsive improvements */
     @media (max-width: 720px) {
@@ -81,7 +93,7 @@
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
       .wrap { margin: 20px auto; padding: 0 12px 80px 12px; }
-      .list { min-height: calc(100vh - 250px); max-height: calc(100vh - 250px); } /* Меньше высота на мобильных */
+      .list { min-height: calc(100vh - 250px); max-height: calc(100vh - 250px); }
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -90,7 +102,7 @@
       .pos { font-size: 13px; }
       .pagination { gap: 8px; padding: 8px; }
       .page-btn { padding: 6px 12px; font-size: 14px; }
-      .to-top { bottom: 70px; right: 12px; padding: 8px; }
+      .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
     }
   </style>
 </head>
@@ -105,6 +117,7 @@
     </div>
 
     <div class="meta" id="meta"></div>
+    <div class="results" id="results"></div>
     <div id="list" class="list"></div>
     <div id="empty" class="empty" style="display:none">Ничего не найдено. Измените фильтры или поиск.</div>
     <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
@@ -113,7 +126,11 @@
       <span id="page-info"></span>
       <button class="page-btn" id="next" aria-label="Следующая страница">Далее</button>
     </div>
-    <button class="to-top" id="to-top" aria-label="Вернуться наверх">↑</button>
+    <button class="to-top" id="to-top" aria-label="Вернуться наверх">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 19V5M5 12l7-7 7 7"/>
+      </svg>
+    </button>
   </div>
 
 <script>
@@ -124,6 +141,7 @@
   const emptyEl = document.getElementById('empty');
   const searchEl = document.getElementById('search');
   const metaEl = document.getElementById('meta');
+  const resultsEl = document.getElementById('results');
   const loaderEl = document.getElementById('loader');
   const paginationEl = document.getElementById('pagination');
   const prevBtn = document.getElementById('prev');
@@ -173,6 +191,14 @@
         (i.iom && i.iom.toLowerCase().includes(q)) ||
         (i.position && i.position.toLowerCase().includes(q))
       );
+    }
+
+    // Показываем количество найденных ИОМов
+    if (q || spec) {
+      resultsEl.style.display = 'block';
+      resultsEl.textContent = `Найдено: ${items.length} ИОМов`;
+    } else {
+      resultsEl.style.display = 'none';
     }
 
     // Пагинация
