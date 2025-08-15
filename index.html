@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Рубрикатор ИОМ-КР / Должности</title>
+  <style>
+    :root { --bg:#0b0f16; --card:#141a24; --text:#e8eef6; --muted:#9fb0c3; --accent:#6aa9ff; }
+    *{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; background:var(--bg); color:var(--text);}
+    .wrap{max-width:980px;margin:40px auto;padding:0 16px}
+    h1{font-size:28px;margin:0 0 16px}
+    .sub{color:var(--muted);margin-bottom:24px}
+    .controls{display:grid;grid-template-columns:1fr 240px;gap:12px;margin:16px 0 24px}
+    @media (max-width:720px){.controls{grid-template-columns:1fr}}
+    .input, select{background:var(--card); border:1px solid #223048; color:var(--text); padding:10px 12px; border-radius:12px; outline:none}
+    .meta{font-size:13px;color:var(--muted);margin:8px 0 16px}
+    .list{display:grid;gap:12px}
+    .item{background:var(--card); border:1px solid #1e2740; padding:14px; border-radius:14px}
+    .iom{font-weight:600}
+    .pos{color:var(--muted)}
+    .empty{opacity:.8; padding:24px; text-align:center; border:1px dashed #2a3756; border-radius:14px}
+    a{color:var(--accent); text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Рубрикатор: ИОМ-КР / Должности</h1>
+    <div class="sub">Выберите врачебную специальность — ниже появится список «<strong>Название ИОМ-КР</strong> / <strong>Должность</strong>» из официального Excel.</div>
+
+    <div class="controls">
+      <input id="search" class="input" placeholder="Поиск по ИОМ/Должности…" />
+      <select id="spec"></select>
+    </div>
+
+    <div class="meta" id="meta"></div>
+    <div id="list" class="list"></div>
+    <div id="empty" class="empty" style="display:none">Ничего не найдено. Измените фильтры или поиск.</div>
+
+    <div class="meta">
+      Источник данных обновляется раз в сутки автоматически из: 
+      <a href="https://static.edu.rosminzdrav.ru/portal/common/instructions/Matrix_IOM-CR-dolgnost-.xlsx" target="_blank" rel="noopener">Excel Минздрава</a>.
+    </div>
+  </div>
+
+<script>
+(async function(){
+  const dataUrl = 'data/matrix.json?v=' + Date.now(); // кэш-бан
+  const specEl = document.getElementById('spec');
+  const listEl = document.getElementById('list');
+  const emptyEl = document.getElementById('empty');
+  const searchEl = document.getElementById('search');
+  const metaEl = document.getElementById('meta');
+
+  let raw = { items: [], specialties: [], updated_at: null };
+  try {
+    const res = await fetch(dataUrl);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    raw = await res.json();
+  } catch (e) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = 'block';
+    emptyEl.textContent = 'Ошибка загрузки данных. Попробуйте обновить страницу позже.';
+    console.error(e);
+    return;
+  }
+
+  // Заполняем селект специальностей
+  const specs = (raw.specialties && raw.specialties.length ? raw.specialties : Array.from(new Set(raw.items.map(i => i.specialty).filter(Boolean)))).sort((a,b)=>a.localeCompare(b,'ru'));
+  specEl.innerHTML = `<option value="">Все специальности</option>` + specs.map(s => `<option>${s}</option>`).join('');
+
+  // Метаданные
+  const d = raw.updated_at ? new Date(raw.updated_at) : null;
+  metaEl.textContent = `${raw.items.length} записей • обновлено: ${d ? d.toLocaleString('ru-RU') : '—'}`;
+
+  function render(){
+    const q = (searchEl.value || '').trim().toLowerCase();
+    const spec = specEl.value;
+    let items = raw.items;
+    if (spec) items = items.filter(i => i.specialty === spec);
+    if (q) {
+      items = items.filter(i =>
+        (i.iom && i.iom.toLowerCase().includes(q)) ||
+        (i.position && i.position.toLowerCase().includes(q))
+      );
+    }
+    listEl.innerHTML = items.map(i => `
+      <div class="item">
+        <div class="iom">${i.iom || '—'}</div>
+        <div class="pos">${i.position || '—'}</div>
+        <div class="pos" style="margin-top:6px"><span style="opacity:.6">Специальность:</span> ${i.specialty || '—'}</div>
+      </div>
+    `).join('');
+    emptyEl.style.display = items.length ? 'none' : 'block';
+  }
+
+  specEl.addEventListener('change', render);
+  searchEl.addEventListener('input', render);
+  render();
+})();
+</script>
+</body>
+</html>
