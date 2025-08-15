@@ -15,6 +15,7 @@
       --border: #223048;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body { font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; background: var(--bg); color: var(--text); }
     .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
     h1 { font-size: 28px; margin: 0 0 16px; }
@@ -49,7 +50,8 @@
       .item { padding: 12px; }
       .iom { font-size: 15px; }
       .pos { font-size: 13px; }
-      .pagination { flex-wrap: wrap; }
+      .pagination { flex-wrap: wrap; gap: 8px; }
+      .page-btn { padding: 6px 12px; font-size: 14px; }
     }
   </style>
 </head>
@@ -68,9 +70,9 @@
     <div id="empty" class="empty" style="display:none">Ничего не найдено. Измените фильтры или поиск.</div>
     <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
     <div class="pagination" id="pagination" style="display:none">
-      <button class="page-btn" id="prev">Назад</button>
+      <button class="page-btn" id="prev" aria-label="Предыдущая страница">Назад</button>
       <span id="page-info"></span>
-      <button class="page-btn" id="next">Далее</button>
+      <button class="page-btn" id="next" aria-label="Следующая страница">Далее</button>
     </div>
 
     <div class="meta">
@@ -123,6 +125,9 @@
   metaEl.textContent = `${raw.items.length} записей • обновлено: ${d}`;
 
   function render(page = 1) {
+    // Сохраняем текущую позицию прокрутки
+    const scrollPosition = window.scrollY || window.pageYOffset;
+
     const q = (searchEl.value || '').trim().toLowerCase();
     const spec = specEl.value;
     let items = raw.items;
@@ -157,12 +162,23 @@
     } else {
       paginationEl.style.display = 'none';
     }
+
+    // Восстанавливаем прокрутку
+    window.scrollTo({ top: scrollPosition, behavior: 'instant' });
   }
 
   specEl.addEventListener('change', () => { currentPage = 1; render(); });
   searchEl.addEventListener('input', () => { currentPage = 1; render(); });
-  prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; render(currentPage); } });
-  nextBtn.addEventListener('click', () => { currentPage++; render(currentPage); });
+  prevBtn.addEventListener('click', () => { 
+    if (currentPage > 1) { 
+      currentPage--; 
+      render(currentPage); 
+    } 
+  });
+  nextBtn.addEventListener('click', () => { 
+    currentPage++; 
+    render(currentPage); 
+  });
 
   render();
 })();
