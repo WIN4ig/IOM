@@ -68,7 +68,7 @@
   const specialties = Array.from(new Set(items.map(i => i.specialty).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'ru'));
   specEl.innerHTML = `<option value="">Все специальности</option>` + specialties.map(s => `<option>${s}</option>`).join('');
 
-  // Метаданные (дата обновления фиксирована, так как не в JSON)
+  // Метаданные
   metaEl.textContent = `${items.length} записей • обновлено: ежедневно в 05:00 (CEST)`;
 
   function render() {
@@ -85,7 +85,6 @@
     listEl.innerHTML = filteredItems.map(i => `
       <div class="item">
         <div class="iom">${i.iom || '—'}</div>
-        <div class="pos">${i.position || '—'}</div>
         <div class="pos" style="margin-top:6px"><span style="opacity:.6">Специальность:</span> ${i.specialty || '—'}</div>
       </div>
     `).join('');
