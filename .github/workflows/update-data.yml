@@ -30,6 +30,7 @@ jobs:
           import json
           import requests
           from io import BytesIO
+          import datetime  # Для updated_at
 
           url = "https://static.edu.rosminzdrav.ru/portal/common/instructions/Matrix_IOM-CR-dolgnost-.xlsx"
           r = requests.get(url)
@@ -46,28 +47,42 @@ jobs:
           col_num = columns.index("Номер ИОМ-КР")
           col_iom = columns.index("Название ИОМ-КР/Должность")
 
+          # Пропускаем ненужные колонки, включая "Применение" (не специальность)
+          skip_cols = ("Применение", "Номер ИОМ-КР", "Название ИОМ-КР/Должность", "Дата начала предоставления доступа")
+
           for idx, row in xls.iterrows():
               iom_name = str(row[col_iom]).strip() if pd.notna(row[col_iom]) else ""
               for col in columns:
-                  if col in ("Номер ИОМ-КР", "Название ИОМ-КР/Должность", "Дата начала предоставления доступа"):
+                  if col in skip_cols:
                       continue
                   if isinstance(col, str) and col.strip() != "" and pd.notna(row[col]):
+                      clean_col = col.strip().lstrip("*")
                       result.append({
-                          "specialty": col.strip().lstrip("*"),
+                          "specialty": clean_col,
                           "iom": iom_name,
-                          "position": col.strip().lstrip("*")
+                          "position": clean_col
                       })
+
+          # Вычисляем уникальные специальности (отсортированные)
+          specialties = sorted(set(item["specialty"] for item in result if item["specialty"]))
+
+          # Формируем объект для JSON
+          data = {
+              "items": result,
+              "specialties": specialties,
+              "updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+          }
 
           # Сохраняем JSON
           import os
           os.makedirs("data", exist_ok=True)
           with open("data/matrix.json", "w", encoding="utf-8") as f:
-              json.dump(result, f, ensure_ascii=False, indent=2)
+              json.dump(data, f, ensure_ascii=False, indent=2)
 
           print(f"Сохранено {len(result)} записей в data/matrix.json")
         shell: python
 
-      - name: Коммит и пуш изменений
+      - name: Коммит и пуш изменений в main
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
@@ -77,4 +92,17 @@ jobs:
           else
             git commit -m "Обновление matrix.json"
             git push
+          fi
+
+      - name: Синхронизация с gh-pages (для GitHub Pages)
+        run: |
+          git fetch origin
+          if git show-ref --quiet refs/heads/gh-pages; then
+            git checkout gh-pages
+            git merge main --no-edit --allow-unrelated-histories || true  # Объединяем изменения из main
+            git add -A
+            git commit -m "Синхронизация matrix.json с main" || echo "Нет изменений для коммита"
+            git push origin gh-pages
+          else
+            echo "Ветка gh-pages не найдена. Создайте её в репозитории и настройте GitHub Pages."
           fi

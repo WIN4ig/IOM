@@ -51,11 +51,11 @@
   const searchEl = document.getElementById('search');
   const metaEl = document.getElementById('meta');
 
-  let items = [];
+  let raw = { items: [], specialties: [], updated_at: null };
   try {
     const res = await fetch(dataUrl);
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    items = await res.json(); // Ожидаем массив объектов
+    raw = await res.json();
   } catch (e) {
     listEl.innerHTML = '';
     emptyEl.style.display = 'block';
@@ -65,30 +65,30 @@
   }
 
   // Заполняем селект специальностей
-  const specialties = Array.from(new Set(items.map(i => i.specialty).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'ru'));
-  specEl.innerHTML = `<option value="">Все специальности</option>` + specialties.map(s => `<option>${s}</option>`).join('');
+  specEl.innerHTML = `<option value="">Все специальности</option>` + raw.specialties.map(s => `<option>${s}</option>`).join('');
 
   // Метаданные
-  metaEl.textContent = `${items.length} записей • обновлено: ежедневно в 05:00 (CEST)`;
+  const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU') : '—';
+  metaEl.textContent = `${raw.items.length} записей • обновлено: ${d}`;
 
-  function render() {
+  function render(){
     const q = (searchEl.value || '').trim().toLowerCase();
     const spec = specEl.value;
-    let filteredItems = items;
-    if (spec) filteredItems = filteredItems.filter(i => i.specialty === spec);
+    let items = raw.items;
+    if (spec) items = items.filter(i => i.specialty === spec);
     if (q) {
-      filteredItems = filteredItems.filter(i =>
+      items = items.filter(i =>
         (i.iom && i.iom.toLowerCase().includes(q)) ||
         (i.position && i.position.toLowerCase().includes(q))
       );
     }
-    listEl.innerHTML = filteredItems.map(i => `
+    listEl.innerHTML = items.map(i => `
       <div class="item">
         <div class="iom">${i.iom || '—'}</div>
         <div class="pos" style="margin-top:6px"><span style="opacity:.6">Специальность:</span> ${i.specialty || '—'}</div>
       </div>
     `).join('');
-    emptyEl.style.display = filteredItems.length ? 'none' : 'block';
+    emptyEl.style.display = items.length ? 'none' : 'block';
   }
 
   specEl.addEventListener('change', render);
