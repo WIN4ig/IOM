@@ -17,7 +17,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body { font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; background: var(--bg); color: var(--text); }
-    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 80px 16px; } /* Добавлен padding-bottom для фиксированной пагинации */
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
@@ -33,7 +33,20 @@
     a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
     a:hover { color: #4a8dff; }
     .loader { text-align: center; padding: 20px; color: var(--muted); }
-    .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+    .pagination { 
+      position: fixed; /* Фиксируем пагинацию внизу */
+      bottom: 0; 
+      left: 0; 
+      right: 0; 
+      display: flex; 
+      justify-content: center; 
+      gap: 10px; 
+      margin: 0; 
+      padding: 10px; 
+      background: var(--bg); /* Фон для пагинации */
+      box-shadow: 0 -2px 4px var(--shadow); /* Тень сверху */
+      z-index: 10; /* Над контентом */
+    }
     .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
     .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .page-btn:hover:not(:disabled) { background: #1e2740; }
@@ -43,14 +56,14 @@
       .controls { flex-direction: column; }
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
-      .wrap { margin: 20px auto; padding: 0 12px; }
+      .wrap { margin: 20px auto; padding: 0 12px 80px 12px; } /* Поддержка padding-bottom на мобильных */
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
       .item { padding: 12px; }
       .iom { font-size: 15px; }
       .pos { font-size: 13px; }
-      .pagination { flex-wrap: wrap; gap: 8px; }
+      .pagination { gap: 8px; padding: 8px; }
       .page-btn { padding: 6px 12px; font-size: 14px; }
     }
   </style>
