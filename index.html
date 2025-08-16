@@ -20,10 +20,10 @@
       font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; 
       background: var(--bg); 
       color: var(--text); 
-      overflow: auto; /* Разрешаем прокрутку тела */
+      overflow: hidden; /* Отключаем основной скролл */
       height: 100%; /* Полная высота для flex */
       margin: 0; /* Убираем дефолтные отступы */
-      position: relative; /* Для правильного позиционирования */
+      position: relative; /* Для правильного позиционирования фиксированного элемента */
     }
     .wrap { 
       max-width: 980px; 
@@ -32,6 +32,7 @@
       flex-direction: column; 
       min-height: 100dvh; /* Минимальная высота для поддержки контента */
       padding: 0 16px; 
+      padding-bottom: 60px; /* Пространство для фиксированной пагинации */
     }
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
@@ -46,8 +47,7 @@
       overflow-y: auto; 
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
-      max-height: calc(100dvh - 200px); /* Уменьшенное ограничение высоты */
-      flex: 1 1 auto; /* Занимает доступное пространство */
+      max-height: calc(100dvh - 300px); /* Ограничение высоты с учетом шапки и подвала */
     }
     .list::-webkit-scrollbar { width: 8px; }
     .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; }
@@ -86,8 +86,11 @@
       background: var(--bg); 
       box-shadow: 0 -2px 4px var(--shadow); 
       z-index: 10; 
-      flex-shrink: 0; /* Не сжимается */
-      width: 100%; /* Полная ширина внутри .wrap */
+      position: fixed; /* Фиксируем внизу экрана */
+      bottom: 0; /* Прикрепляем к нижней части */
+      left: 0; /* Полная ширина */
+      width: 100%; 
+      background: inherit; /* Сохраняем фон */
     }
     .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
     .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -124,7 +127,7 @@
       h1 { font-size: 24px; }
       .wrap { padding: 0 12px; }
       .list { 
-        max-height: calc(100dvh - 180px); /* Уменьшил высоту для мобильных */
+        max-height: calc(100dvh - 200px); /* Ограничение высоты для мобильных */
       }
       .pagination { padding: 8px; }
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
@@ -137,12 +140,9 @@
       .item { padding: 10px; }
       .iom { font-size: 15px; }
       .pos { font-size: 13px; }
-      .pagination { gap: 6px; }
-      .page-btn { padding: 6px 10px; font-size: 14px; }
+      .pagination { gap: 8px; }
+      .page-btn { padding: 6px 12px; font-size: 14px; }
       .page-size-select { width: 80px; } /* Увеличил ширину для маленьких экранов */
-      .list { 
-        max-height: calc(100dvh - 150px); /* Дальнейшее уменьшение высоты */
-      }
     }
   </style>
 </head>
