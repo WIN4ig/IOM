@@ -184,7 +184,6 @@
   const nextBtn = document.getElementById('next');
   const pageInfoEl = document.getElementById('page-info');
   const toTopBtn = document.getElementById('to-top');
-  const pageSizeInput = document.getElementById('page-size');
 
   let raw = { items: [], specialties: [], updated_at: null };
   let currentPage = 1;
@@ -216,18 +215,6 @@
   // Метаданные
   const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
   metaEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
-
-  // Обновляем pageSize при изменении или вводе значения
-  pageSizeInput.addEventListener('change', () => {
-    let newSize = parseInt(pageSizeInput.value, 10);
-    if (isNaN(newSize) || newSize < 1) {
-      newSize = 50; // Значение по умолчанию, если ввод некорректен
-      pageSizeInput.value = newSize;
-    }
-    pageSize = newSize;
-    currentPage = 1; // Сбрасываем на первую страницу
-    render();
-  });
 
   function updateToTopVisibility() {
     if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
@@ -267,12 +254,23 @@
     // Управление видимостью поля pageSize
     const pageSizeContainer = document.createElement('div');
     pageSizeContainer.className = 'page-size-container';
-    if (items.length > 1) {
+    const existingInput = metaEl.querySelector('#page-size');
+    if (items.length > 1 && !existingInput) {
       pageSizeContainer.innerHTML = 'ИОМ на странице <input type="number" id="page-size" class="page-size-input" value="' + pageSize + '" min="1">';
       metaEl.appendChild(pageSizeContainer);
-    } else {
-      const existingInput = metaEl.querySelector('#page-size');
-      if (existingInput) existingInput.parentElement.remove();
+      const pageSizeInput = document.getElementById('page-size');
+      pageSizeInput.addEventListener('change', () => {
+        let newSize = parseInt(pageSizeInput.value, 10);
+        if (isNaN(newSize) || newSize < 1) {
+          newSize = 50; // Значение по умолчанию, если ввод некорректен
+          pageSizeInput.value = newSize;
+        }
+        pageSize = newSize;
+        currentPage = 1; // Сбрасываем на первую страницу
+        render();
+      });
+    } else if (items.length <= 1 && existingInput) {
+      existingInput.parentElement.remove();
     }
 
     // Пагинация
@@ -321,7 +319,7 @@
       render(currentPage); 
     } 
   });
-  nextBtn.addEventListener('change', () => { 
+  nextBtn.addEventListener('click', () => { 
     currentPage++; 
     render(currentPage); 
   });
