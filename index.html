@@ -22,7 +22,7 @@
       color: var(--text); 
       overflow: hidden; /* Отключаем основной скролл */
     }
-    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 100px 16px; } /* Увеличен padding-bottom для пагинации */
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
@@ -34,9 +34,10 @@
     .list { 
       display: grid; 
       gap: 12px; 
-      min-height: 0; /* Динамическая адаптация */
-      overflow-y: auto; 
-      padding-bottom: 120px; /* Увеличен для видимости последнего элемента с учётом навигации */
+      min-height: 0; 
+      max-height: calc(100vh - 200px); /* Ограничение высоты для прокрутки */
+      overflow-y: auto; /* Восстановлена прокрутка */
+      padding-bottom: 100px; /* Увеличен для видимости последнего элемента */
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
     }
@@ -53,20 +54,26 @@
     a:hover { color: #4a8dff; }
     .loader { text-align: center; padding: 20px; color: var(--muted); }
     .pagination { 
+      position: fixed; 
+      bottom: 0; 
+      left: 0; 
+      right: 0; 
       display: flex; 
       justify-content: center; 
       gap: 10px; 
-      margin: 20px 0; 
+      margin: 0; 
       padding: 10px; 
       background: var(--bg); 
       box-shadow: 0 -2px 4px var(--shadow); 
+      z-index: 10; 
     }
     .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
     .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .page-btn:hover:not(:disabled) { background: #1e2740; }
     .to-top { 
-      display: block; 
-      margin: 20px auto 0; 
+      position: fixed; 
+      bottom: 90px; 
+      right: 20px; 
       background: var(--card); 
       border: 1px solid var(--border); 
       color: var(--text); 
@@ -74,30 +81,33 @@
       height: 40px; 
       border-radius: 50%; 
       cursor: pointer; 
-      box-shadow: 0 2px 4px var(--shadow); 
-      transition: transform 0.2s; 
       display: none; 
-      text-align: center; 
+      z-index: 10; 
+      box-shadow: 0 2px 4px var(--shadow); 
+      transition: opacity 0.3s, transform 0.2s; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
     }
-    .to-top.visible { display: block; }
-    .to-top:hover { transform: scale(1.1); }
-    .to-top svg { vertical-align: middle; }
+    .to-top.visible { display: flex; opacity: 1; }
+    .to-top:hover { background: #1e2740; transform: scale(1.1); }
 
     /* Responsive improvements */
     @media (max-width: 720px) {
       .controls { flex-direction: column; }
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
-      .wrap { margin: 20px auto; padding: 0 12px; }
-      .pagination { margin: 16px 0; }
-      .to-top { margin: 16px auto 0; width: 36px; height: 36px; }
+      .wrap { margin: 20px auto; padding: 0 12px 80px 12px; }
+      .list { max-height: calc(100vh - 180px); }
+      .pagination { padding: 8px; }
+      .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
       .item { padding: 12px; }
       .iom { font-size: 15px; }
       .pos { font-size: 13px; }
-      .pagination { gap: 8px; padding: 8px; }
+      .pagination { gap: 8px; }
       .page-btn { padding: 6px 12px; font-size: 14px; }
     }
   </style>
@@ -117,17 +127,17 @@
     <div id="list" class="list"></div>
     <div id="empty" class="empty" style="display:none">Ничего не найдено. Измените фильтры или поиск.</div>
     <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
-    <div class="pagination" id="pagination" style="display:none">
-      <button class="page-btn" id="prev" aria-label="Предыдущая страница">Назад</button>
-      <span id="page-info"></span>
-      <button class="page-btn" id="next" aria-label="Следующая страница">Далее</button>
-    </div>
-    <button class="to-top" id="to-top" aria-label="Вернуться наверх">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 19V5M5 12l7-7 7 7"/>
-      </svg>
-    </button>
   </div>
+  <div class="pagination" id="pagination" style="display:none">
+    <button class="page-btn" id="prev" aria-label="Предыдущая страница">Назад</button>
+    <span id="page-info"></span>
+    <button class="page-btn" id="next" aria-label="Следующая страница">Далее</button>
+  </div>
+  <button class="to-top" id="to-top" aria-label="Вернуться наверх">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 19V5M5 12l7-7 7 7"/>
+    </svg>
+  </button>
 
 <script>
 (async function(){
