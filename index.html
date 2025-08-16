@@ -22,7 +22,7 @@
       color: var(--text); 
       overflow: hidden; /* Отключаем основной скролл */
     }
-    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 120px 16px; } /* Увеличен padding-bottom */
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 120px 16px; } /* Сохранён padding-bottom для пагинации */
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
@@ -35,9 +35,9 @@
       display: grid; 
       gap: 12px; 
       min-height: 0; 
-      max-height: calc(100vh - 240px); /* Учтена шапка и пагинация */
+      max-height: calc(100vh - 180px); /* Фиксированная высота, независимая от пагинации */
       overflow-y: auto; /* Прокрутка */
-      padding-bottom: 20px; /* Минимальный отступ */
+      padding-bottom: 0; /* Убран padding-bottom */
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
     }
@@ -54,7 +54,7 @@
     a:hover { color: #4a8dff; }
     .loader { text-align: center; padding: 20px; color: var(--muted); }
     .pagination { 
-      position: sticky; 
+      position: fixed; 
       bottom: 0; 
       left: 0; 
       right: 0; 
@@ -98,7 +98,7 @@
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
       .wrap { margin: 20px auto; padding: 0 12px 120px 12px; }
-      .list { max-height: calc(100vh - 220px); }
+      .list { max-height: calc(100vh - 160px); }
       .pagination { padding: 8px; }
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
     }
@@ -127,11 +127,11 @@
     <div id="list" class="list"></div>
     <div id="empty" class="empty" style="display:none">Ничего не найдено. Измените фильтры или поиск.</div>
     <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
-    <div class="pagination" id="pagination" style="display:none">
-      <button class="page-btn" id="prev" aria-label="Предыдущая страница">Назад</button>
-      <span id="page-info"></span>
-      <button class="page-btn" id="next" aria-label="Следующая страница">Далее</button>
-    </div>
+  </div>
+  <div class="pagination" id="pagination" style="display:none">
+    <button class="page-btn" id="prev" aria-label="Предыдущая страница">Назад</button>
+    <span id="page-info"></span>
+    <button class="page-btn" id="next" aria-label="Следующая страница">Далее</button>
   </div>
   <button class="to-top" id="to-top" aria-label="Вернуться наверх">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
