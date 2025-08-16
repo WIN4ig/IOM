@@ -136,6 +136,12 @@
     <div class="controls">
       <input id="search" class="input" placeholder="Поиск по ИОМ/Должности…" />
       <select id="spec"></select>
+      <select id="page-size" class="input" contenteditable="true">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+      </select>
     </div>
 
     <div id="error-message" class="error-message error" style="display: none;">
@@ -178,10 +184,11 @@
   const nextBtn = document.getElementById('next');
   const pageInfoEl = document.getElementById('page-info');
   const toTopBtn = document.getElementById('to-top');
+  const pageSizeEl = document.getElementById('page-size');
 
   let raw = { items: [], specialties: [], updated_at: null };
   let currentPage = 1;
-  const pageSize = 50; // Пагинация: 50 записей на страницу
+  let pageSize = 50; // Начальное значение
   let isDataLoaded = false; // Флаг успешной загрузки данных
 
   // Показываем лоадер
@@ -209,6 +216,28 @@
   // Метаданные
   const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU') : '—';
   metaEl.textContent = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
+
+  // Обновляем pageSize при изменении или вводе значения
+  pageSizeEl.addEventListener('change', () => {
+    let newSize = parseInt(pageSizeEl.value, 10);
+    if (isNaN(newSize) || newSize < 1) {
+      newSize = 50; // Значение по умолчанию, если ввод некорректен
+      pageSizeEl.value = newSize;
+    }
+    pageSize = newSize;
+    currentPage = 1; // Сбрасываем на первую страницу
+    render();
+  });
+  pageSizeEl.addEventListener('blur', () => {
+    let newSize = parseInt(pageSizeEl.value, 10);
+    if (isNaN(newSize) || newSize < 1) {
+      newSize = 50;
+      pageSizeEl.value = newSize;
+    }
+    pageSize = newSize;
+    currentPage = 1; // Сбрасываем на первую страницу
+    render();
+  });
 
   function updateToTopVisibility() {
     if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
