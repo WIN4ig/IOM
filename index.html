@@ -179,6 +179,7 @@
   let raw = { items: [], specialties: [], updated_at: null };
   let currentPage = 1;
   const pageSize = 50; // Пагинация: 50 записей на страницу
+  let isDataLoaded = false; // Флаг успешной загрузки данных
 
   // Показываем лоадер
   loaderEl.style.display = 'block';
@@ -187,12 +188,14 @@
     const res = await fetch(dataUrl);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     raw = await res.json();
+    isDataLoaded = true; // Устанавливаем флаг, если данные загружены
   } catch (e) {
     listEl.innerHTML = '';
     errorMessageEl.style.display = 'block';
     errorMessageEl.innerText = 'Ошибка загрузки данных. Попробуйте обновить страницу позже.';
     console.error(e);
     loaderEl.style.display = 'none';
+    toTopBtn.style.display = 'none'; // Явно скрываем кнопку при ошибке
     return;
   }
 
@@ -256,9 +259,6 @@
 
     // Восстанавливаем прокрутку внутри списка
     listEl.scrollTop = scrollPosition;
-
-    // Показ/скрытие кнопки "Наверх"
-    toTopBtn.classList.toggle('visible', listEl.scrollTop > 200);
   }
 
   // Обработчик для кнопки "Наверх"
@@ -281,7 +281,13 @@
 
   // Обновляем видимость кнопки "Наверх" при скролле
   listEl.addEventListener('scroll', () => {
-    toTopBtn.classList.toggle('visible', listEl.scrollTop > 200);
+    if (isDataLoaded && listEl.children.length > 0) { // Проверяем наличие данных и элементов в списке
+      const hasScroll = listEl.scrollHeight > listEl.clientHeight;
+      const isScrolled = listEl.scrollTop > 0;
+      toTopBtn.classList.toggle('visible', hasScroll && isScrolled);
+    } else {
+      toTopBtn.classList.remove('visible'); // Скрываем кнопку при ошибке или пустом списке
+    }
   });
 
   render();
