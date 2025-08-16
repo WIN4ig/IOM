@@ -57,17 +57,16 @@
     .item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); }
     .iom { font-weight: 600; font-size: 16px; }
     .pos { color: var(--muted); font-size: 14px; }
-    .empty { opacity: 0.8; padding: 24px; text-align: center; border: 1px dashed #2a3756; border-radius: 14px; }
     .error-message {
       margin: 12px 0;
       padding: 10px;
       border-radius: 8px;
-      background: #ffe5e5;
-      color: #a00;
       font-size: 14px;
       text-align: center;
       box-shadow: 0 2px 4px var(--shadow);
     }
+    .error-message.error { background: #ffe5e5; color: #a00; } /* Для "Ошибка загрузки данных" */
+    .error-message.empty { background: #fff3cd; color: #856404; } /* Для "Ничего не найдено" */
     a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
     a:hover { color: #4a8dff; }
     .loader { text-align: center; padding: 20px; color: var(--muted); }
@@ -139,14 +138,17 @@
       <select id="spec"></select>
     </div>
 
-    <div id="error-message" class="error-message" style="display: none;">
+    <div id="error-message" class="error-message error" style="display: none;">
       Ошибка загрузки данных. Попробуйте обновить страницу позже.
+    </div>
+
+    <div id="empty-message" class="error-message empty" style="display: none;">
+      Ничего не найдено. Измените фильтры или поиск.
     </div>
 
     <div class="meta" id="meta"></div>
     <div class="results" id="results"></div>
     <div id="list" class="list"></div>
-    <div id="empty" class="empty" style="display:none">Ничего не найдено. Измените фильтры или поиск.</div>
     <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
     <div class="pagination" id="pagination" style="display:none">
       <button class="page-btn" id="prev" aria-label="Предыдущая страница">Назад</button>
@@ -166,6 +168,7 @@
   const specEl = document.getElementById('spec');
   const listEl = document.getElementById('list');
   const errorMessageEl = document.getElementById('error-message');
+  const emptyMessageEl = document.getElementById('empty-message');
   const searchEl = document.getElementById('search');
   const metaEl = document.getElementById('meta');
   const resultsEl = document.getElementById('results');
@@ -192,7 +195,6 @@
   } catch (e) {
     listEl.innerHTML = '';
     errorMessageEl.style.display = 'block';
-    errorMessageEl.innerText = 'Ошибка загрузки данных. Попробуйте обновить страницу позже.';
     console.error(e);
     loaderEl.style.display = 'none';
     toTopBtn.style.display = 'none'; // Явно скрываем кнопку при ошибке
@@ -243,9 +245,9 @@
       </div>
     `).join('');
 
-    // Показываем/скрываем сообщение "Ничего не найдено"
-    const emptyEl = document.getElementById('empty');
-    emptyEl.style.display = items.length ? 'none' : 'block';
+    // Управляем отображением сообщений
+    errorMessageEl.style.display = 'none'; // Скрываем сообщение об ошибке загрузки
+    emptyMessageEl.style.display = items.length ? 'none' : 'block'; // Показываем "Ничего не найдено" при пустом списке
 
     // Пагинация контролы
     if (totalPages > 1) {
@@ -281,7 +283,7 @@
 
   // Обновляем видимость кнопки "Наверх" при скролле
   listEl.addEventListener('scroll', () => {
-    if (isDataLoaded && listEl.children.length > 0) { // Проверяем наличие данных и элементов в списке
+    if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') { // Проверяем наличие данных, элементов и отсутствие пустого состояния
       const hasScroll = listEl.scrollHeight > listEl.clientHeight;
       const isScrolled = listEl.scrollTop > 0;
       toTopBtn.classList.toggle('visible', hasScroll && isScrolled);
