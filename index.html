@@ -214,11 +214,9 @@
     if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
       const hasScroll = listEl.scrollHeight > listEl.clientHeight;
       const isScrolled = listEl.scrollTop > 0;
-      console.log('Debug - updateToTopVisibility:', { hasScroll, isScrolled, childrenLength: listEl.children.length, emptyDisplay: emptyMessageEl.style.display });
       toTopBtn.style.display = hasScroll && isScrolled ? 'flex' : 'none'; // Явное управление display
       toTopBtn.classList.toggle('visible', hasScroll && isScrolled);
     } else {
-      console.log('Debug - Hiding toTop:', { isDataLoaded, childrenLength: listEl.children.length, emptyDisplay: emptyMessageEl.style.display });
       toTopBtn.style.display = 'none'; // Явно скрываем кнопку
       toTopBtn.classList.remove('visible');
     }
