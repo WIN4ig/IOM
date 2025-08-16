@@ -22,7 +22,7 @@
       color: var(--text); 
       overflow: hidden; /* Отключаем основной скролл */
     }
-    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 100px 16px; } /* Увеличен padding-bottom для пагинации */
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 120px 16px; } /* Увеличен padding-bottom для мобильных */
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
@@ -36,8 +36,8 @@
       gap: 12px; 
       min-height: 0; 
       max-height: calc(100vh - 200px); /* Ограничение высоты для прокрутки */
-      overflow-y: auto; /* Восстановлена прокрутка */
-      padding-bottom: 100px; /* Увеличен для видимости последнего элемента */
+      overflow-y: auto; /* Прокрутка */
+      padding-bottom: 20px; /* Минимальный отступ для видимости последнего элемента */
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
     }
@@ -54,18 +54,13 @@
     a:hover { color: #4a8dff; }
     .loader { text-align: center; padding: 20px; color: var(--muted); }
     .pagination { 
-      position: fixed; 
-      bottom: 0; 
-      left: 0; 
-      right: 0; 
       display: flex; 
       justify-content: center; 
       gap: 10px; 
-      margin: 0; 
+      margin: 20px 0 0; 
       padding: 10px; 
       background: var(--bg); 
       box-shadow: 0 -2px 4px var(--shadow); 
-      z-index: 10; 
     }
     .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
     .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -97,7 +92,7 @@
       .controls { flex-direction: column; }
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
-      .wrap { margin: 20px auto; padding: 0 12px 80px 12px; }
+      .wrap { margin: 20px auto; padding: 0 12px 120px 12px; } /* Увеличен padding-bottom для мобильных */
       .list { max-height: calc(100vh - 180px); }
       .pagination { padding: 8px; }
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
