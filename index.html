@@ -118,7 +118,11 @@
     .to-top:hover { background: #1e2740; transform: scale(1.1); }
     .page-size-container { display: flex; align-items: center; gap: 5px; }
     .page-size-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
-    .page-size-select { width: 80px; text-align: center; } /* Increased width for mobile */
+    .page-size-select { 
+      width: 90px; 
+      text-align: center; 
+      padding: 8px 10px; /* Reduced padding for mobile */
+    }
 
     @media (max-width: 720px) {
       .controls { flex-direction: column; }
@@ -129,7 +133,11 @@
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
       .meta { flex-direction: column; align-items: flex-start; gap: 5px; }
       .page-size-container { margin-top: 5px; justify-content: flex-end; }
-      .page-size-select { width: 70px; } /* Adjusted for mobile */
+      .page-size-select { 
+        width: 80px; 
+        font-size: 13px; /* Smaller font for mobile */
+        padding: 6px 8px; /* Further reduced padding */
+      }
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -138,7 +146,11 @@
       .pos { font-size: 13px; }
       .pagination { gap: 8px; }
       .page-btn { padding: 6px 12px; font-size: 14px; }
-      .page-size-select { width: 60px; } /* Slightly smaller but sufficient */
+      .page-size-select { 
+        width: 70px; 
+        font-size: 12px; /* Even smaller font for very small screens */
+        padding: 5px 7px;
+      }
     }
   </style>
 </head>
@@ -161,7 +173,9 @@
 
     <div class="meta" id="meta"></div>
     <div class="results" id="results"></div>
-    <div id="list" class="list"></div>
+    <div
+
+ id="list" class="list"></div>
     <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
   </div>
 
