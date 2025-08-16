@@ -27,10 +27,10 @@
     .wrap { 
       max-width: 980px; 
       margin: 0 auto; /* Центрируем без верхнего/нижнего отступа */
-      display: flex; /* Ваш стиль */
-      flex-direction: column; /* Ваш стиль */
-      height: 100vh; /* Ваш стиль */
-      padding: 0 16px; /* Убрал padding-bottom, так как высота управляется flex */
+      display: flex; 
+      flex-direction: column; 
+      height: 100dvh; /* Используем 100dvh для динамической высоты */
+      padding: 0 16px; 
     }
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
@@ -43,10 +43,11 @@
     .list { 
       display: grid; 
       gap: 12px; 
-      flex: 1; /* Ваш стиль */
-      overflow-y: auto; /* Ваш стиль */
+      flex: 1; 
+      overflow-y: auto; 
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
+      min-height: 0; /* Убеждаемся, что flex работает корректно */
     }
     .list::-webkit-scrollbar { width: 8px; }
     .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; }
@@ -61,7 +62,7 @@
     a:hover { color: #4a8dff; }
     .loader { text-align: center; padding: 20px; color: var(--muted); }
     .pagination { 
-      flex-shrink: 0; /* Ваш стиль */
+      flex-shrink: 0; 
       display: flex; 
       justify-content: center; 
       gap: 10px; 
@@ -102,7 +103,9 @@
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
       .wrap { padding: 0 12px; }
-      .list { max-height: none; } /* Убрал фиксированную высоту для flex */
+      .list { 
+        max-height: calc(100dvh - 200px); /* Ограничение высоты для мобильных */
+      }
       .pagination { padding: 8px; }
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
     }
