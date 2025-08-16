@@ -22,7 +22,11 @@
       color: var(--text); 
       overflow: hidden; /* Отключаем основной скролл */
     }
-    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 120px 16px; } /* Сохранён padding-bottom для пагинации */
+    .wrap { 
+      max-width: 980px; 
+      margin: 40px auto; 
+      padding: 0 16px 80px 16px; /* Принято ваше значение 80px для места под пагинацию */
+    }
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
@@ -35,9 +39,9 @@
       display: grid; 
       gap: 12px; 
       min-height: 0; 
-      max-height: calc(100vh - 180px); /* Фиксированная высота, независимая от пагинации */
+      max-height: calc(100vh - 220px); /* Принято ваше значение с учётом шапки и пагинации */
       overflow-y: auto; /* Прокрутка */
-      padding-bottom: 0; /* Убран padding-bottom */
+      padding-bottom: 0; /* Убран padding-bottom, как предложено */
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
     }
@@ -97,8 +101,8 @@
       .controls { flex-direction: column; }
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
-      .wrap { margin: 20px auto; padding: 0 12px 120px 12px; }
-      .list { max-height: calc(100vh - 160px); }
+      .wrap { margin: 20px auto; padding: 0 12px 80px 12px; }
+      .list { max-height: calc(100vh - 200px); } /* Корректировка для мобильных */
       .pagination { padding: 8px; }
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
     }
