@@ -23,7 +23,6 @@
       overflow: hidden; /* Отключаем основной скролл */
       height: 100%; /* Полная высота для flex */
       margin: 0; /* Убираем дефолтные отступы */
-      position: relative; /* Для правильного позиционирования фиксированного элемента */
     }
     .wrap { 
       max-width: 980px; 
@@ -32,7 +31,6 @@
       flex-direction: column; 
       min-height: 100dvh; /* Минимальная высота для поддержки контента */
       padding: 0 16px; 
-      padding-bottom: 60px; /* Пространство для фиксированной пагинации */
     }
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
@@ -79,17 +77,18 @@
     a:hover { color: #4a8dff; }
     .loader { text-align: center; padding: 20px; color: var(--muted); }
     .pagination { 
+      flex-shrink: 0; 
       display: flex; 
       justify-content: center; 
       gap: 10px; 
+      margin: 0; 
       padding: 10px; 
       background: var(--bg); 
       box-shadow: 0 -2px 4px var(--shadow); 
       z-index: 10; 
-      position: fixed; /* Фиксируем внизу экрана */
+      position: sticky; /* Фиксируем внизу */
       bottom: 0; /* Прикрепляем к нижней части */
-      left: 0; /* Полная ширина */
-      width: 100%; 
+      width: 100%; /* Полная ширина внутри .wrap */
       background: inherit; /* Сохраняем фон */
     }
     .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
