@@ -33,7 +33,7 @@
       margin: 0 auto; /* Центрируем без верхнего/нижнего отступа */
       display: flex; 
       flex-direction: column; 
-      min-height: calc(100dvh - var(--pagination-height) - var(--pagination-offset)); /* Учитываем высоту пагинации и отступ */
+      min-height: calc(100dvh - var(--pagination-offset)); /* Учитываем только отступ пагинации */
       padding: 0 1rem; /* Относительные отступы */
     }
     h1 { font-size: 1.75rem; margin: 0 0 1rem; }
@@ -49,7 +49,7 @@
       overflow-y: auto; 
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
-      max-height: calc(100dvh - var(--header-height) - var(--pagination-height) - var(--pagination-offset) - 2.5rem); /* Ограничение высоты с учётом всех элементов */
+      flex: 1 1 auto; /* Занимает всё доступное пространство */
     }
     .list::-webkit-scrollbar { width: 0.5rem; }
     .list::-webkit-scrollbar-track { background: var(--card); border-radius: 0.25rem; }
@@ -133,7 +133,7 @@
       h1 { font-size: 1.5rem; }
       .wrap { padding: 0 0.75rem; }
       .list { 
-        max-height: calc(100dvh - var(--header-height) - var(--pagination-height) - var(--pagination-offset) - 1.25rem); /* Уменьшенное значение для мобильных */
+        flex: 1 1 auto; /* Сохраняем гибкость */
       }
       .pagination { padding: 0.5rem; height: 6vh; } /* Уменьшенная относительная высота */
       .to-top { bottom: calc(6vh + var(--pagination-offset) + 0.75rem); right: 0.75rem; width: 2.25rem; height: 2.25rem; }
@@ -150,7 +150,7 @@
       .page-btn { padding: 0.375rem 0.625rem; font-size: 0.875rem; }
       .page-size-select { width: 5rem; } /* 80px в rem */
       .list { 
-        max-height: calc(100dvh - var(--header-height) - var(--pagination-height) - var(--pagination-offset) - 0.625rem); /* Минимальное значение для маленьких экранов */
+        flex: 1 1 auto; /* Сохраняем гибкость */
       }
       .to-top { bottom: calc(5.5vh + var(--pagination-offset) + 0.5rem); }
     }
