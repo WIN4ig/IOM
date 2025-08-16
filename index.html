@@ -25,7 +25,7 @@
     .wrap { 
       max-width: 980px; 
       margin: 40px auto; 
-      padding: 0 16px 80px 16px; /* Принято ваше значение 80px для места под пагинацию */
+      padding: 0 16px 80px 16px; /* Место под фиксированную пагинацию */
     }
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
@@ -39,9 +39,9 @@
       display: grid; 
       gap: 12px; 
       min-height: 0; 
-      max-height: calc(100vh - 220px); /* Принято ваше значение с учётом шапки и пагинации */
+      max-height: calc(100vh - 220px); /* Учтена шапка и пагинация */
       overflow-y: auto; /* Прокрутка */
-      padding-bottom: 0; /* Убран padding-bottom, как предложено */
+      padding-bottom: 0; /* Убран padding-bottom */
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
     }
@@ -225,15 +225,18 @@
 
     emptyEl.style.display = items.length ? 'none' : 'block';
 
-    // Пагинация контролы
-    if (totalPages > 1) {
-      paginationEl.style.display = 'flex';
-      pageInfoEl.textContent = `Страница ${page} из ${totalPages}`;
-      prevBtn.disabled = page === 1;
-      nextBtn.disabled = page === totalPages;
-    } else {
-      paginationEl.style.display = 'none';
-    }
+    // Пагинация контролы (ваш предложенный вариант)
+    paginationEl.style.display = 'flex';
+    pageInfoEl.textContent = totalPages > 1
+      ? `Страница ${page} из ${totalPages}`
+      : `Всего ${items.length} записей`;
+
+    // Кнопки переключения
+    prevBtn.style.display = totalPages > 1 ? 'inline-block' : 'none';
+    nextBtn.style.display = totalPages > 1 ? 'inline-block' : 'none';
+
+    prevBtn.disabled = page === 1;
+    nextBtn.disabled = page === totalPages;
 
     // Восстанавливаем прокрутку внутри списка
     listEl.scrollTop = scrollPosition;
