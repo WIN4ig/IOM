@@ -35,9 +35,9 @@
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
-    .input, select, .page-size-input { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; }
-    .input:focus, select:focus, .page-size-input:focus { border-color: var(--accent); }
-    .meta { font-size: 13px; color: var(--muted); margin: 8px 0 16px; display: flex; align-items: center; gap: 10px; }
+    .input, select, .page-size-select { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; }
+    .input:focus, select:focus, .page-size-select:focus { border-color: var(--accent); }
+    .meta { font-size: 13px; color: var(--muted); margin: 8px 0 16px; display: flex; justify-content: space-between; align-items: center; }
     .results { font-size: 14px; color: var(--muted); margin-bottom: 12px; display: none; }
     .results strong { color: var(--text); font-weight: bold; }
     .list { 
@@ -107,7 +107,7 @@
     .to-top:hover { background: #1e2740; transform: scale(1.1); }
     .page-size-container { display: flex; align-items: center; gap: 5px; }
     .page-size-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
-    .page-size-input { width: 60px; text-align: center; }
+    .page-size-select { width: 60px; text-align: center; }
 
     /* Responsive improvements */
     @media (max-width: 720px) {
@@ -121,7 +121,7 @@
       .pagination { padding: 8px; }
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
       .meta { flex-direction: column; align-items: flex-start; gap: 5px; }
-      .page-size-container { margin-top: 5px; }
+      .page-size-container { margin-top: 5px; justify-content: flex-end; }
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -130,7 +130,7 @@
       .pos { font-size: 13px; }
       .pagination { gap: 8px; }
       .page-btn { padding: 6px 12px; font-size: 14px; }
-      .page-size-input { width: 50px; }
+      .page-size-select { width: 50px; }
     }
   </style>
 </head>
@@ -246,7 +246,7 @@
     // Показываем количество найденных ИОМов
     if (q || spec) {
       resultsEl.style.display = 'block';
-      resultsEl.innerHTML = `<strong>Найдено:</strong> ${items.length} <strong>ИОМов</strong>`;
+      resultsEl.innerHTML = `Найдено: <strong>${items.length}</strong> ИОМ`;
     } else {
       resultsEl.style.display = 'none';
     }
@@ -254,23 +254,33 @@
     // Управление видимостью поля pageSize
     const pageSizeContainer = document.createElement('div');
     pageSizeContainer.className = 'page-size-container';
-    const existingInput = metaEl.querySelector('#page-size');
-    if (items.length > 1 && !existingInput) {
-      pageSizeContainer.innerHTML = 'ИОМ на странице <input type="number" id="page-size" class="page-size-input" value="' + pageSize + '" min="1">';
+    const existingSelect = metaEl.querySelector('#page-size');
+    if (items.length > 1 && !existingSelect) {
+      pageSizeContainer.innerHTML = 'ИОМ на странице: <select id="page-size" class="page-size-select" contenteditable="true"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select>';
       metaEl.appendChild(pageSizeContainer);
-      const pageSizeInput = document.getElementById('page-size');
-      pageSizeInput.addEventListener('change', () => {
-        let newSize = parseInt(pageSizeInput.value, 10);
+      const pageSizeSelect = document.getElementById('page-size');
+      pageSizeSelect.addEventListener('change', () => {
+        let newSize = parseInt(pageSizeSelect.value, 10);
         if (isNaN(newSize) || newSize < 1) {
           newSize = 50; // Значение по умолчанию, если ввод некорректен
-          pageSizeInput.value = newSize;
+          pageSizeSelect.value = newSize;
         }
         pageSize = newSize;
         currentPage = 1; // Сбрасываем на первую страницу
         render();
       });
-    } else if (items.length <= 1 && existingInput) {
-      existingInput.parentElement.remove();
+      pageSizeSelect.addEventListener('blur', () => {
+        let newSize = parseInt(pageSizeSelect.value, 10);
+        if (isNaN(newSize) || newSize < 1) {
+          newSize = 50;
+          pageSizeSelect.value = newSize;
+        }
+        pageSize = newSize;
+        currentPage = 1; // Сбрасываем на первую страницу
+        render();
+      });
+    } else if (items.length <= 1 && existingSelect) {
+      existingSelect.parentElement.remove();
     }
 
     // Пагинация
