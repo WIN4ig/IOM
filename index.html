@@ -210,6 +210,18 @@
   const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU') : '—';
   metaEl.textContent = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
 
+  function updateToTopVisibility() {
+    if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
+      const hasScroll = listEl.scrollHeight > listEl.clientHeight;
+      const isScrolled = listEl.scrollTop > 0;
+      console.log('Debug - updateToTopVisibility:', { hasScroll, isScrolled, childrenLength: listEl.children.length, emptyDisplay: emptyMessageEl.style.display });
+      toTopBtn.classList.toggle('visible', hasScroll && isScrolled);
+    } else {
+      console.log('Debug - Hiding toTop:', { isDataLoaded, childrenLength: listEl.children.length, emptyDisplay: emptyMessageEl.style.display });
+      toTopBtn.classList.remove('visible');
+    }
+  }
+
   function render(page = 1) {
     // Сохраняем позицию прокрутки внутри списка
     const scrollPosition = listEl.scrollTop;
@@ -249,14 +261,8 @@
     errorMessageEl.style.display = 'none'; // Скрываем сообщение об ошибке загрузки
     emptyMessageEl.style.display = items.length ? 'none' : 'block'; // Показываем "Ничего не найдено" при пустом списке
 
-    // Управление видимостью кнопки "Наверх"
-    if (isDataLoaded && items.length > 0 && emptyMessageEl.style.display === 'none') {
-      const hasScroll = listEl.scrollHeight > listEl.clientHeight;
-      const isScrolled = listEl.scrollTop > 0;
-      toTopBtn.classList.toggle('visible', hasScroll && isScrolled);
-    } else {
-      toTopBtn.classList.remove('visible');
-    }
+    // Обновляем видимость кнопки "Наверх"
+    updateToTopVisibility();
 
     // Пагинация контролы
     if (totalPages > 1) {
@@ -290,15 +296,9 @@
     render(currentPage); 
   });
 
-  // Обновляем видимость кнопки "Наверх" при скролле (только если данные загружены и список не пуст)
+  // Обновляем видимость кнопки "Наверх" при скролле
   listEl.addEventListener('scroll', () => {
-    if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
-      const hasScroll = listEl.scrollHeight > listEl.clientHeight;
-      const isScrolled = listEl.scrollTop > 0;
-      toTopBtn.classList.toggle('visible', hasScroll && isScrolled);
-    } else {
-      toTopBtn.classList.remove('visible');
-    }
+    updateToTopVisibility();
   });
 
   render();
