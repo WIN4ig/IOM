@@ -22,7 +22,7 @@
       color: var(--text); 
       overflow: hidden; /* Отключаем основной скролл */
     }
-    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 80px 16px; } /* Увеличен padding-bottom */
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 100px 16px; } /* Увеличен padding-bottom для пагинации */
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
@@ -37,7 +37,7 @@
       min-height: 0; 
       max-height: calc(100vh - 200px); /* Ограничение высоты для прокрутки */
       overflow-y: auto; /* Прокрутка */
-      padding-bottom: 60px; /* Отступ для видимости последнего элемента перед навигацией */
+      padding-bottom: 80px; /* Отступ для видимости последнего элемента перед пагинацией */
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
     }
@@ -97,7 +97,7 @@
       .controls { flex-direction: column; }
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
-      .wrap { margin: 20px auto; padding: 0 12px 80px 12px; }
+      .wrap { margin: 20px auto; padding: 0 12px 100px 12px; }
       .list { max-height: calc(100vh - 180px); }
       .pagination { padding: 8px; }
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
