@@ -249,6 +249,15 @@
     errorMessageEl.style.display = 'none'; // Скрываем сообщение об ошибке загрузки
     emptyMessageEl.style.display = items.length ? 'none' : 'block'; // Показываем "Ничего не найдено" при пустом списке
 
+    // Управление видимостью кнопки "Наверх"
+    if (isDataLoaded && items.length > 0 && emptyMessageEl.style.display === 'none') {
+      const hasScroll = listEl.scrollHeight > listEl.clientHeight;
+      const isScrolled = listEl.scrollTop > 0;
+      toTopBtn.classList.toggle('visible', hasScroll && isScrolled);
+    } else {
+      toTopBtn.classList.remove('visible');
+    }
+
     // Пагинация контролы
     if (totalPages > 1) {
       paginationEl.style.display = 'flex';
@@ -281,14 +290,14 @@
     render(currentPage); 
   });
 
-  // Обновляем видимость кнопки "Наверх" при скролле
+  // Обновляем видимость кнопки "Наверх" при скролле (только если данные загружены и список не пуст)
   listEl.addEventListener('scroll', () => {
-    if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') { // Проверяем наличие данных, элементов и отсутствие пустого состояния
+    if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
       const hasScroll = listEl.scrollHeight > listEl.clientHeight;
       const isScrolled = listEl.scrollTop > 0;
       toTopBtn.classList.toggle('visible', hasScroll && isScrolled);
     } else {
-      toTopBtn.classList.remove('visible'); // Скрываем кнопку при ошибке или пустом списке
+      toTopBtn.classList.remove('visible');
     }
   });
 
