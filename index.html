@@ -15,22 +15,14 @@
       --border: #223048;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; height: 100%; }
+    html { scroll-behavior: smooth; }
     body { 
       font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; 
       background: var(--bg); 
       color: var(--text); 
       overflow: hidden; /* Отключаем основной скролл */
-      height: 100%;
     }
-    .wrap { 
-      max-width: 980px; 
-      margin: 0 auto; 
-      padding: 40px 16px 0 16px; /* Убрали bottom padding */
-      display: flex; 
-      flex-direction: column; 
-      height: 100%; 
-    }
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 120px 16px; } /* Уменьшен padding-bottom */
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
@@ -42,9 +34,10 @@
     .list { 
       display: grid; 
       gap: 12px; 
-      flex: 1; /* Заполняет оставшееся пространство */
+      min-height: calc(100vh - 220px); /* Уменьшена высота */
+      max-height: calc(100vh - 220px); 
       overflow-y: auto; 
-      padding-bottom: 80px; /* Для видимости последнего элемента над пагинацией */
+      padding-bottom: 40px; /* Уменьшен для баланса */
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
     }
@@ -79,7 +72,7 @@
     .page-btn:hover:not(:disabled) { background: #1e2740; }
     .to-top { 
       position: fixed; 
-      bottom: 70px; /* Скорректировано для пагинации */
+      bottom: 110px; /* Скорректировано для баланса */
       right: 20px; 
       background: var(--card); 
       border: 1px solid var(--border); 
@@ -104,7 +97,8 @@
       .controls { flex-direction: column; }
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
-      .wrap { padding: 20px 12px 0 12px; }
+      .wrap { margin: 20px auto; padding: 0 12px 100px 12px; }
+      .list { min-height: calc(100vh - 200px); max-height: calc(100vh - 200px); }
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -113,7 +107,7 @@
       .pos { font-size: 13px; }
       .pagination { gap: 8px; padding: 8px; }
       .page-btn { padding: 6px 12px; font-size: 14px; }
-      .to-top { bottom: 60px; right: 12px; width: 36px; height: 36px; }
+      .to-top { bottom: 100px; right: 12px; width: 36px; height: 36px; }
     }
   </style>
 </head>
@@ -218,7 +212,7 @@
     const paginatedItems = items.slice(start, start + pageSize);
 
     listEl.innerHTML = paginatedItems.map(i => `
-      <div class="item" style="min-height: 80px;">
+      <div class="item">
         <div class="iom">${i.iom || '—'}</div>
         <div class="pos" style="margin-top:6px"><span style="opacity:.6">Специальность:</span> ${i.specialty || '—'}</div>
       </div>
