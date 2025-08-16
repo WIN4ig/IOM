@@ -39,9 +39,9 @@
       display: grid; 
       gap: 12px; 
       min-height: 0; 
-      max-height: calc(100vh - 220px); /* Учтена шапка и пагинация */
+      max-height: calc(100vh - 180px); /* Скорректировано с учётом шапки 180px */
       overflow-y: auto; /* Прокрутка */
-      padding-bottom: 0; /* Убран padding-bottom */
+      padding-bottom: 80px; /* Зарезервировано место под .pagination */
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
     }
@@ -102,7 +102,7 @@
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
       .wrap { margin: 20px auto; padding: 0 12px 80px 12px; }
-      .list { max-height: calc(100vh - 200px); } /* Корректировка для мобильных */
+      .list { max-height: calc(100vh - 160px); } /* Корректировка для мобильных */
       .pagination { padding: 8px; }
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
     }
@@ -225,18 +225,15 @@
 
     emptyEl.style.display = items.length ? 'none' : 'block';
 
-    // Пагинация контролы (ваш предложенный вариант)
-    paginationEl.style.display = 'flex';
-    pageInfoEl.textContent = totalPages > 1
-      ? `Страница ${page} из ${totalPages}`
-      : `Всего ${items.length} записей`;
-
-    // Кнопки переключения
-    prevBtn.style.display = totalPages > 1 ? 'inline-block' : 'none';
-    nextBtn.style.display = totalPages > 1 ? 'inline-block' : 'none';
-
-    prevBtn.disabled = page === 1;
-    nextBtn.disabled = page === totalPages;
+    // Пагинация контролы
+    if (totalPages > 1) {
+      paginationEl.style.display = 'flex';
+      pageInfoEl.textContent = `Страница ${page} из ${totalPages}`;
+      prevBtn.disabled = page === 1;
+      nextBtn.disabled = page === totalPages;
+    } else {
+      paginationEl.style.display = 'none';
+    }
 
     // Восстанавливаем прокрутку внутри списка
     listEl.scrollTop = scrollPosition;
