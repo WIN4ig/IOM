@@ -113,7 +113,7 @@
     .to-top:hover { background: #1e2740; transform: scale(1.1); }
     .page-size-container { display: flex; align-items: center; gap: 5px; }
     .page-size-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
-    .page-size-select { width: 60px; text-align: center; }
+    .page-size-select { width: 80px; text-align: center; } /* Увеличил ширину до 80px */
 
     /* Responsive improvements */
     @media (max-width: 720px) {
@@ -128,6 +128,7 @@
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
       .meta { flex-direction: column; align-items: flex-start; gap: 5px; }
       .page-size-container { margin-top: 5px; justify-content: flex-end; }
+      .page-size-select { width: 70px; } /* Увеличил ширину для мобильных */
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -136,7 +137,7 @@
       .pos { font-size: 13px; }
       .pagination { gap: 8px; }
       .page-btn { padding: 6px 12px; font-size: 14px; }
-      .page-size-select { width: 50px; }
+      .page-size-select { width: 60px; } /* Увеличил ширину для маленьких экранов */
     }
   </style>
 </head>
