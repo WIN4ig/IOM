@@ -38,8 +38,7 @@
     .input, select, .page-size-select { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; }
     .input:focus, select:focus, .page-size-select:focus { border-color: var(--accent); }
     .meta { font-size: 13px; color: var(--muted); margin: 8px 0 16px; display: flex; justify-content: space-between; align-items: center; }
-    .results { font-size: 14px; color: var(--muted); margin-bottom: 12px; display: none; }
-    .results strong { color: var(--text); font-weight: bold; }
+    .results { font-size: 14px; color: var(--text); font-weight: bold; margin-bottom: 12px; display: none; }
     .list { 
       display: grid; 
       gap: 12px; 
@@ -246,7 +245,7 @@
     // Показываем количество найденных ИОМов
     if (q || spec) {
       resultsEl.style.display = 'block';
-      resultsEl.innerHTML = `Найдено: <strong>${items.length}</strong> ИОМ`;
+      resultsEl.textContent = `Найдено: ${items.length} ИОМ`;
     } else {
       resultsEl.style.display = 'none';
     }
@@ -260,20 +259,22 @@
       metaEl.appendChild(pageSizeContainer);
       const pageSizeSelect = document.getElementById('page-size');
       pageSizeSelect.addEventListener('change', () => {
-        let newSize = parseInt(pageSizeSelect.value, 10);
+        let newSize = parseInt(pageSizeSelect.value || pageSizeSelect.textContent, 10);
         if (isNaN(newSize) || newSize < 1) {
           newSize = 50; // Значение по умолчанию, если ввод некорректен
           pageSizeSelect.value = newSize;
+          pageSizeSelect.textContent = newSize;
         }
         pageSize = newSize;
         currentPage = 1; // Сбрасываем на первую страницу
         render();
       });
       pageSizeSelect.addEventListener('blur', () => {
-        let newSize = parseInt(pageSizeSelect.value, 10);
+        let newSize = parseInt(pageSizeSelect.value || pageSizeSelect.textContent, 10);
         if (isNaN(newSize) || newSize < 1) {
           newSize = 50;
           pageSizeSelect.value = newSize;
+          pageSizeSelect.textContent = newSize;
         }
         pageSize = newSize;
         currentPage = 1; // Сбрасываем на первую страницу
