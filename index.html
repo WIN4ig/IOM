@@ -58,6 +58,16 @@
     .iom { font-weight: 600; font-size: 16px; }
     .pos { color: var(--muted); font-size: 14px; }
     .empty { opacity: 0.8; padding: 24px; text-align: center; border: 1px dashed #2a3756; border-radius: 14px; }
+    .error-message {
+      margin: 12px 0;
+      padding: 10px;
+      border-radius: 8px;
+      background: #ffe5e5;
+      color: #a00;
+      font-size: 14px;
+      text-align: center;
+      box-shadow: 0 2px 4px var(--shadow);
+    }
     a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
     a:hover { color: #4a8dff; }
     .loader { text-align: center; padding: 20px; color: var(--muted); }
@@ -129,6 +139,10 @@
       <select id="spec"></select>
     </div>
 
+    <div id="error-message" class="error-message" style="display: none;">
+      Ошибка загрузки данных. Попробуйте обновить страницу позже.
+    </div>
+
     <div class="meta" id="meta"></div>
     <div class="results" id="results"></div>
     <div id="list" class="list"></div>
@@ -151,7 +165,7 @@
   const dataUrl = 'data/matrix.json?v=' + Date.now(); // кэш-бан
   const specEl = document.getElementById('spec');
   const listEl = document.getElementById('list');
-  const emptyEl = document.getElementById('empty');
+  const errorMessageEl = document.getElementById('error-message');
   const searchEl = document.getElementById('search');
   const metaEl = document.getElementById('meta');
   const resultsEl = document.getElementById('results');
@@ -175,8 +189,8 @@
     raw = await res.json();
   } catch (e) {
     listEl.innerHTML = '';
-    emptyEl.style.display = 'block';
-    emptyEl.textContent = 'Ошибка загрузки данных. Попробуйте обновить страницу позже.';
+    errorMessageEl.style.display = 'block';
+    errorMessageEl.innerText = 'Ошибка загрузки данных. Попробуйте обновить страницу позже.';
     console.error(e);
     loaderEl.style.display = 'none';
     return;
@@ -226,6 +240,8 @@
       </div>
     `).join('');
 
+    // Показываем/скрываем сообщение "Ничего не найдено"
+    const emptyEl = document.getElementById('empty');
     emptyEl.style.display = items.length ? 'none' : 'block';
 
     // Пагинация контролы
