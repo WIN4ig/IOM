@@ -48,11 +48,12 @@
       scrollbar-color: var(--muted) var(--card); 
       min-height: 0; /* Убеждаемся, что flex работает корректно */
     }
+    .list.centered { display: flex; flex-direction: column; justify-content: center; align-items: center; }
     .list::-webkit-scrollbar { width: 8px; }
     .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; }
     .list::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 4px; }
     .list::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-    .item { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 14px; box-shadow: 0 2px 4px var(--shadow); transition: transform 0.2s, box-shadow 0.2s; }
+    .item { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 14px; box-shadow: 0 2px 4px var(--shadow); transition: transform 0.2s, box-shadow 0.2s; height: auto; }
     .item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); }
     .iom { font-weight: 600; font-size: 16px; }
     .pos { color: var(--muted); font-size: 14px; }
