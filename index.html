@@ -37,7 +37,7 @@
       min-height: calc(100vh - 220px); /* Уменьшена высота */
       max-height: calc(100vh - 220px); 
       overflow-y: auto; 
-      padding-bottom: 40px; /* Уменьшен для баланса */
+      padding-bottom: 60px; /* Увеличен для видимости последнего элемента */
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
     }
@@ -156,7 +156,7 @@
 
   let raw = { items: [], specialties: [], updated_at: null };
   let currentPage = 1;
-  const pageSize = 25; // Пагинация: 50 записей на страницу
+  const pageSize = 50; // Пагинация: 50 записей на страницу
 
   // Показываем лоадер
   loaderEl.style.display = 'block';
@@ -201,7 +201,7 @@
     // Показываем количество найденных ИОМов
     if (q || spec) {
       resultsEl.style.display = 'block';
-      resultsEl.innerHTML = `<strong>Найдено:</strong> ${items.length} <strong>ИОМов</strong>`;
+      results.innerHTML = `<strong>Найдено:</strong> ${items.length} <strong>ИОМов</strong>`;
     } else {
       resultsEl.style.display = 'none';
     }
