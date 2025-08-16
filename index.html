@@ -22,7 +22,7 @@
       color: var(--text); 
       overflow: hidden; /* Отключаем основной скролл */
     }
-    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 100px 16px; margin-top: -60px; } /* Уменьшен padding-bottom и добавлен отрицательный margin-top */
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 100px 16px; margin-top: -60px; } /* Сохранён отрицательный margin-top */
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
@@ -35,9 +35,8 @@
       display: grid; 
       gap: 12px; 
       min-height: 0; 
-      max-height: calc(100vh - 200px); /* Вернули исходную высоту */
+      max-height: calc(100vh - 200px); /* Исходная высота */
       overflow-y: auto; /* Прокрутка */
-      padding-bottom: 60px; /* Уменьшен отступ для видимости последнего элемента */
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
     }
@@ -212,8 +211,8 @@
     const start = (page - 1) * pageSize;
     const paginatedItems = items.slice(start, start + pageSize);
 
-    listEl.innerHTML = paginatedItems.map(i => `
-      <div class="item">
+    listEl.innerHTML = paginatedItems.map((i, index) => `
+      <div class="item" data-index="${index}">
         <div class="iom">${i.iom || '—'}</div>
         <div class="pos" style="margin-top:6px"><span style="opacity:.6">Специальность:</span> ${i.specialty || '—'}</div>
       </div>
@@ -229,6 +228,17 @@
       nextBtn.disabled = page === totalPages;
     } else {
       paginationEl.style.display = 'none';
+    }
+
+    // Динамический margin-bottom для последнего элемента
+    const itemsEl = listEl.getElementsByClassName('item');
+    if (itemsEl.length > 0) {
+      const lastItem = itemsEl[itemsEl.length - 1];
+      if (listEl.scrollHeight > listEl.clientHeight) {
+        lastItem.style.marginBottom = '60px'; // Отступ только если прокрутка активна
+      } else {
+        lastItem.style.marginBottom = '0'; // Без отступа, если список помещается
+      }
     }
 
     // Восстанавливаем прокрутку внутри списка
@@ -256,9 +266,18 @@
     render(currentPage); 
   });
 
-  // Обновляем видимость кнопки "Наверх" при скролле
+  // Обновляем видимость кнопки "Наверх" и отступ при скролле
   listEl.addEventListener('scroll', () => {
     toTopBtn.classList.toggle('visible', listEl.scrollTop > 200);
+    const itemsEl = listEl.getElementsByClassName('item');
+    if (itemsEl.length > 0) {
+      const lastItem = itemsEl[itemsEl.length - 1];
+      if (listEl.scrollHeight > listEl.clientHeight) {
+        lastItem.style.marginBottom = '60px';
+      } else {
+        lastItem.style.marginBottom = '0';
+      }
+    }
   });
 
   render();
