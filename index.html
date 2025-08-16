@@ -34,7 +34,6 @@
       flex-direction: column; 
       min-height: 100dvh; /* Минимальная высота для поддержки контента */
       padding: 0 1rem; /* Относительные отступы */
-      padding-bottom: var(--pagination-height); /* Пространство для пагинации */
     }
     h1 { font-size: 1.75rem; margin: 0 0 1rem; }
     .sub { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.875rem; }
@@ -49,7 +48,7 @@
       overflow-y: auto; 
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
-      max-height: calc(100dvh - var(--header-height) - var(--pagination-height) - 2.5rem); /* Относительная высота с учётом шапки, пагинации и отступов */
+      max-height: calc(100dvh - var(--header-height) - var(--pagination-height) - 2.5rem); /* Ограничение высоты с учётом шапки, пагинации и отступов */
     }
     .list::-webkit-scrollbar { width: 0.5rem; }
     .list::-webkit-scrollbar-track { background: var(--card); border-radius: 0.25rem; }
@@ -91,12 +90,8 @@
       background: var(--bg); 
       box-shadow: 0 -0.125rem 0.25rem var(--shadow); 
       z-index: 10; 
-      position: fixed; 
-      bottom: 0; 
-      left: 0; 
-      width: 100%; 
-      height: var(--pagination-height); 
-      background: inherit; 
+      height: var(--pagination-height); /* Относительная высота */
+      flex-shrink: 0; /* Не сжимается */
     }
     .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: background 0.2s; }
     .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
