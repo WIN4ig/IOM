@@ -13,105 +13,91 @@
       --accent: #6aa9ff; 
       --shadow: rgba(0,0,0,0.2); 
       --border: #223048;
-      --header-height: 10vh; /* Относительная высота шапки */
-      --pagination-height: 8vh; /* Относительная высота пагинации */
-      --pagination-offset: 1vh; /* Отступ от нижнего края */
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; height: 100%; }
     body { 
-      font: 1rem/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; 
+      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; 
       background: var(--bg); 
       color: var(--text); 
-      height: 100%; 
-      margin: 0; 
-      overflow: hidden; /* Отключаем скролл body */
-      position: relative; 
+      overflow: hidden; /* Отключаем основной скролл */
+      height: 100%; /* Полная высота для flex */
+      margin: 0; /* Убираем дефолтные отступы */
     }
     .wrap { 
-      max-width: 90vw; 
-      margin: 0 auto; 
+      max-width: 980px; 
+      margin: 0 auto; /* Центрируем без верхнего/нижнего отступа */
       display: flex; 
       flex-direction: column; 
-      min-height: calc(100dvh - var(--pagination-height) - var(--pagination-offset)); /* Высота с учётом пагинации */
-      padding: 0 1rem; 
+      height: 100dvh; /* Используем 100dvh для динамической высоты */
+      padding: 0 16px; 
     }
-    h1 { font-size: 1.75rem; margin: 0 0 1rem; }
-    .sub { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.875rem; }
-    .controls { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1rem 0 1.5rem; }
-    .input, select { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 0.625rem 0.75rem; border-radius: 0.75rem; outline: none; transition: border 0.2s; }
-    .input:focus, select:focus { border-color: var(--accent); }
-    .meta { font-size: 0.8125rem; color: var(--muted); margin: 0.5rem 0 1rem; display: flex; justify-content: space-between; align-items: center; }
-    .results { font-size: 0.875rem; color: var(--text); font-weight: bold; margin-bottom: 0.75rem; display: none; }
+    h1 { font-size: 28px; margin: 0 0 16px; }
+    .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
+    .input, select, .page-size-input { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; }
+    .input:focus, select:focus, .page-size-input:focus { border-color: var(--accent); }
+    .meta { font-size: 13px; color: var(--muted); margin: 8px 0 16px; display: flex; align-items: center; gap: 10px; }
+    .results { font-size: 14px; color: var(--muted); margin-bottom: 12px; display: none; }
+    .results strong { color: var(--text); font-weight: bold; }
     .list { 
-      flex: 1 1 auto; /* Занимает всё доступное пространство между шапкой и пагинацией */
-      overflow-y: auto; /* Скролл только внутри list */
+      display: grid; 
+      gap: 12px; 
+      flex: 1; 
+      overflow-y: auto; 
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
+      min-height: 0; /* Убеждаемся, что flex работает корректно */
     }
-    .list::-webkit-scrollbar { width: 0.5rem; }
-    .list::-webkit-scrollbar-track { background: var(--card); border-radius: 0.25rem; }
-    .list::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 0.25rem; }
+    .list::-webkit-scrollbar { width: 8px; }
+    .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; }
+    .list::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 4px; }
     .list::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-    .item { 
-      background: var(--card); 
-      border: 1px solid var(--border); 
-      padding: 0.625rem; 
-      border-radius: 0.875rem; 
-      box-shadow: 0 0.125rem 0.25rem var(--shadow); 
-      transition: transform 0.2s, box-shadow 0.2s; 
-      min-height: 3.75rem; /* Минимальная высота */
-      display: flex; 
-      flex-direction: column; 
-      justify-content: center; 
-    }
-    .item:hover { transform: translateY(-0.125rem); box-shadow: 0 0.25rem 0.5rem var(--shadow); }
-    .iom { font-weight: 600; font-size: 1rem; }
-    .pos { color: var(--muted); font-size: 0.875rem; }
+    .item { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 14px; box-shadow: 0 2px 4px var(--shadow); transition: transform 0.2s, box-shadow 0.2s; }
+    .item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); }
+    .iom { font-weight: 600; font-size: 16px; }
+    .pos { color: var(--muted); font-size: 14px; }
     .error-message {
-      margin: 0.75rem 0;
-      padding: 0.625rem;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
+      margin: 12px 0;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
       text-align: center;
-      box-shadow: 0 0.125rem 0.25rem var(--shadow);
+      box-shadow: 0 2px 4px var(--shadow);
     }
-    .error-message.error { background: #ffe5e5; color: #a00; }
-    .error-message.empty { background: #fff3cd; color: #856404; }
+    .error-message.error { background: #ffe5e5; color: #a00; } /* Для "Ошибка загрузки данных" */
+    .error-message.empty { background: #fff3cd; color: #856404; } /* Для "Ничего не найдено" */
     a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
     a:hover { color: #4a8dff; }
-    .loader { text-align: center; padding: 1.25rem; color: var(--muted); }
+    .loader { text-align: center; padding: 20px; color: var(--muted); }
     .pagination { 
+      flex-shrink: 0; 
       display: flex; 
       justify-content: center; 
-      gap: 0.625rem; 
-      padding: 0.625rem; 
+      gap: 10px; 
+      margin: 0; 
+      padding: 10px; 
       background: var(--bg); 
-      box-shadow: 0 -0.125rem 0.25rem var(--shadow); 
-      position: fixed; /* Фиксированный блок */
-      bottom: var(--pagination-offset); 
-      left: 0; 
-      width: 100%; 
-      height: var(--pagination-height); 
-      flex-shrink: 0; 
+      box-shadow: 0 -2px 4px var(--shadow); 
+      z-index: 10; 
     }
-    .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: background 0.2s; }
+    .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
     .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .page-btn:hover:not(:disabled) { background: #1e2740; }
     .to-top { 
       position: fixed; 
-      bottom: calc(var(--pagination-height) + var(--pagination-offset) + 1.25rem); 
-      right: 1.25rem; 
+      bottom: 90px; 
+      right: 20px; 
       background: var(--card); 
       border: 1px solid var(--border); 
       color: var(--text); 
-      width: 2.5rem; 
-      height: 2.5rem; 
+      width: 40px; 
+      height: 40px; 
       border-radius: 50%; 
       cursor: pointer; 
       display: none; 
       z-index: 10; 
-      box-shadow: 0 0.125rem 0.25rem var(--shadow); 
+      box-shadow: 0 2px 4px var(--shadow); 
       transition: opacity 0.3s, transform 0.2s; 
       display: flex; 
       align-items: center; 
@@ -119,32 +105,32 @@
     }
     .to-top.visible { display: flex; opacity: 1; }
     .to-top:hover { background: #1e2740; transform: scale(1.1); }
-    .page-size-container { display: flex; align-items: center; gap: 0.3125rem; }
-    .page-size-label { font-size: 0.8125rem; color: var(--muted); white-space: nowrap; }
-    .page-size-select { width: 5.625rem; text-align: center; }
+    .page-size-container { display: flex; align-items: center; gap: 5px; }
+    .page-size-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .page-size-input { width: 60px; text-align: center; }
 
+    /* Responsive improvements */
     @media (max-width: 720px) {
       .controls { flex-direction: column; }
       .input, select { width: 100%; }
-      h1 { font-size: 1.5rem; }
-      .wrap { padding: 0 0.75rem; }
-      .list { flex: 1 1 auto; }
-      .pagination { padding: 0.5rem; height: 6vh; }
-      .to-top { bottom: calc(6vh + var(--pagination-offset) + 0.75rem); right: 0.75rem; width: 2.25rem; height: 2.25rem; }
-      .meta { flex-direction: column; align-items: flex-start; gap: 0.3125rem; }
-      .page-size-container { margin-top: 0.3125rem; justify-content: flex-end; }
-      .page-size-select { width: 5.625rem; }
+      h1 { font-size: 24px; }
+      .wrap { padding: 0 12px; }
+      .list { 
+        max-height: calc(100dvh - 200px); /* Ограничение высоты для мобильных */
+      }
+      .pagination { padding: 8px; }
+      .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
+      .meta { flex-direction: column; align-items: flex-start; gap: 5px; }
+      .page-size-container { margin-top: 5px; }
     }
     @media (max-width: 480px) {
-      body { font-size: 0.875rem; }
-      .item { min-height: 3.125rem; }
-      .iom { font-size: 0.9375rem; }
-      .pos { font-size: 0.8125rem; }
-      .pagination { gap: 0.375rem; height: 5.5vh; }
-      .page-btn { padding: 0.375rem 0.625rem; font-size: 0.875rem; }
-      .page-size-select { width: 5rem; }
-      .list { flex: 1 1 auto; }
-      .to-top { bottom: calc(5.5vh + var(--pagination-offset) + 0.5rem); }
+      body { font-size: 14px; }
+      .item { padding: 12px; }
+      .iom { font-size: 15px; }
+      .pos { font-size: 13px; }
+      .pagination { gap: 8px; }
+      .page-btn { padding: 6px 12px; font-size: 14px; }
+      .page-size-input { width: 50px; }
     }
   </style>
 </head>
@@ -198,6 +184,7 @@
   const nextBtn = document.getElementById('next');
   const pageInfoEl = document.getElementById('page-info');
   const toTopBtn = document.getElementById('to-top');
+  const pageSizeInput = document.getElementById('page-size');
 
   let raw = { items: [], specialties: [], updated_at: null };
   let currentPage = 1;
@@ -230,19 +217,32 @@
   const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
   metaEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
 
+  // Обновляем pageSize при изменении или вводе значения
+  pageSizeInput.addEventListener('change', () => {
+    let newSize = parseInt(pageSizeInput.value, 10);
+    if (isNaN(newSize) || newSize < 1) {
+      newSize = 50; // Значение по умолчанию, если ввод некорректен
+      pageSizeInput.value = newSize;
+    }
+    pageSize = newSize;
+    currentPage = 1; // Сбрасываем на первую страницу
+    render();
+  });
+
   function updateToTopVisibility() {
     if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
       const hasScroll = listEl.scrollHeight > listEl.clientHeight;
       const isScrolled = listEl.scrollTop > 0;
-      toTopBtn.style.display = hasScroll && isScrolled ? 'flex' : 'none';
+      toTopBtn.style.display = hasScroll && isScrolled ? 'flex' : 'none'; // Явное управление display
       toTopBtn.classList.toggle('visible', hasScroll && isScrolled);
     } else {
-      toTopBtn.style.display = 'none';
+      toTopBtn.style.display = 'none'; // Явно скрываем кнопку
       toTopBtn.classList.remove('visible');
     }
   }
 
   function render(page = 1) {
+    // Сохраняем позицию прокрутки внутри списка
     const scrollPosition = listEl.scrollTop;
 
     const q = (searchEl.value || '').trim().toLowerCase();
@@ -256,31 +256,26 @@
       );
     }
 
+    // Показываем количество найденных ИОМов
     if (q || spec) {
       resultsEl.style.display = 'block';
-      resultsEl.textContent = `Найдено: ${items.length} ИОМ`;
+      resultsEl.innerHTML = `<strong>Найдено:</strong> ${items.length} <strong>ИОМов</strong>`;
     } else {
       resultsEl.style.display = 'none';
     }
 
+    // Управление видимостью поля pageSize
     const pageSizeContainer = document.createElement('div');
     pageSizeContainer.className = 'page-size-container';
-    const existingSelect = metaEl.querySelector('#page-size-select');
-    if (items.length > 1 && !existingSelect) {
-      pageSizeContainer.innerHTML = 'ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select>';
+    if (items.length > 1) {
+      pageSizeContainer.innerHTML = 'ИОМ на странице <input type="number" id="page-size" class="page-size-input" value="' + pageSize + '" min="1">';
       metaEl.appendChild(pageSizeContainer);
-      const pageSizeSelect = document.getElementById('page-size-select');
-      pageSizeSelect.addEventListener('change', () => {
-        let newSize = parseInt(pageSizeSelect.value, 10);
-        if (isNaN(newSize) || newSize < 1) newSize = 50;
-        pageSize = newSize;
-        currentPage = 1;
-        render();
-      });
-    } else if (items.length <= 1 && existingSelect) {
-      existingSelect.parentElement.remove();
+    } else {
+      const existingInput = metaEl.querySelector('#page-size');
+      if (existingInput) existingInput.parentElement.remove();
     }
 
+    // Пагинация
     const totalPages = Math.ceil(items.length / pageSize);
     const start = (page - 1) * pageSize;
     const paginatedItems = items.slice(start, start + pageSize);
@@ -288,15 +283,18 @@
     listEl.innerHTML = paginatedItems.map((i, index) => `
       <div class="item" data-index="${index}">
         <div class="iom">${i.iom || '—'}</div>
-        <div class="pos" style="margin-top:0.375rem"><span style="opacity:.6">Специальность:</span> ${i.specialty || '—'}</div>
+        <div class="pos" style="margin-top:6px"><span style="opacity:.6">Специальность:</span> ${i.specialty || '—'}</div>
       </div>
     `).join('');
 
-    errorMessageEl.style.display = 'none';
-    emptyMessageEl.style.display = items.length ? 'none' : 'block';
+    // Управляем отображением сообщений
+    errorMessageEl.style.display = 'none'; // Скрываем сообщение об ошибке загрузки
+    emptyMessageEl.style.display = items.length ? 'none' : 'block'; // Показываем "Ничего не найдено" при пустом списке
 
+    // Обновляем видимость кнопки "Наверх"
     updateToTopVisibility();
 
+    // Пагинация контролы
     if (totalPages > 1) {
       paginationEl.style.display = 'flex';
       pageInfoEl.textContent = `Страница ${page} из ${totalPages}`;
@@ -306,9 +304,11 @@
       paginationEl.style.display = 'none';
     }
 
+    // Восстанавливаем прокрутку внутри списка
     listEl.scrollTop = scrollPosition;
   }
 
+  // Обработчик для кнопки "Наверх"
   toTopBtn.addEventListener('click', () => {
     listEl.scrollTo({ top: 0, behavior: 'smooth' });
   });
@@ -316,12 +316,17 @@
   specEl.addEventListener('change', () => { currentPage = 1; render(); });
   searchEl.addEventListener('input', () => { currentPage = 1; render(); });
   prevBtn.addEventListener('click', () => { 
-    if (currentPage > 1) { currentPage--; render(currentPage); } 
+    if (currentPage > 1) { 
+      currentPage--; 
+      render(currentPage); 
+    } 
   });
-  nextBtn.addEventListener('click', () => { 
-    currentPage++; render(currentPage); 
+  nextBtn.addEventListener('change', () => { 
+    currentPage++; 
+    render(currentPage); 
   });
 
+  // Обновляем видимость кнопки "Наверх" при скролле
   listEl.addEventListener('scroll', () => {
     updateToTopVisibility();
   });
