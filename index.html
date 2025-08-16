@@ -15,6 +15,7 @@
       --border: #223048;
       --header-height: 10vh; /* Относительная высота шапки */
       --pagination-height: 8vh; /* Относительная высота пагинации */
+      --pagination-offset: 1vh; /* Отступ от нижнего края */
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; height: 100%; }
@@ -32,7 +33,7 @@
       margin: 0 auto; /* Центрируем без верхнего/нижнего отступа */
       display: flex; 
       flex-direction: column; 
-      min-height: 100dvh; /* Минимальная высота для поддержки контента */
+      min-height: calc(100dvh - var(--pagination-height) - var(--pagination-offset)); /* Учитываем высоту пагинации и отступ */
       padding: 0 1rem; /* Относительные отступы */
     }
     h1 { font-size: 1.75rem; margin: 0 0 1rem; }
@@ -48,7 +49,7 @@
       overflow-y: auto; 
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
-      max-height: calc(100dvh - var(--header-height) - var(--pagination-height) - 2.5rem); /* Ограничение высоты с учётом шапки, пагинации и отступов */
+      max-height: calc(100dvh - var(--header-height) - var(--pagination-height) - var(--pagination-offset) - 2.5rem); /* Ограничение высоты с учётом всех элементов */
     }
     .list::-webkit-scrollbar { width: 0.5rem; }
     .list::-webkit-scrollbar-track { background: var(--card); border-radius: 0.25rem; }
@@ -90,6 +91,10 @@
       background: var(--bg); 
       box-shadow: 0 -0.125rem 0.25rem var(--shadow); 
       z-index: 10; 
+      position: fixed; 
+      bottom: var(--pagination-offset); /* Отступ от нижнего края */
+      left: 0; 
+      width: 100%; 
       height: var(--pagination-height); /* Относительная высота */
       flex-shrink: 0; /* Не сжимается */
     }
@@ -98,13 +103,13 @@
     .page-btn:hover:not(:disabled) { background: #1e2740; }
     .to-top { 
       position: fixed; 
-      bottom: 5.625rem; /* 90px в относительных единицах */
-      right: 1.25rem; /* 20px в относительных единицах */
+      bottom: calc(var(--pagination-height) + var(--pagination-offset) + 1.25rem); /* Сдвигаем выше пагинации */
+      right: 1.25rem; 
       background: var(--card); 
       border: 1px solid var(--border); 
       color: var(--text); 
-      width: 2.5rem; /* 40px */
-      height: 2.5rem; /* 40px */
+      width: 2.5rem; 
+      height: 2.5rem; 
       border-radius: 50%; 
       cursor: pointer; 
       display: none; 
@@ -128,10 +133,10 @@
       h1 { font-size: 1.5rem; }
       .wrap { padding: 0 0.75rem; }
       .list { 
-        max-height: calc(100dvh - var(--header-height) - var(--pagination-height) - 1.25rem); /* Уменьшенное значение для мобильных */
+        max-height: calc(100dvh - var(--header-height) - var(--pagination-height) - var(--pagination-offset) - 1.25rem); /* Уменьшенное значение для мобильных */
       }
       .pagination { padding: 0.5rem; height: 6vh; } /* Уменьшенная относительная высота */
-      .to-top { bottom: 5rem; right: 0.75rem; width: 2.25rem; height: 2.25rem; }
+      .to-top { bottom: calc(6vh + var(--pagination-offset) + 0.75rem); right: 0.75rem; width: 2.25rem; height: 2.25rem; }
       .meta { flex-direction: column; align-items: flex-start; gap: 0.3125rem; }
       .page-size-container { margin-top: 0.3125rem; justify-content: flex-end; }
       .page-size-select { width: 5.625rem; }
@@ -145,8 +150,9 @@
       .page-btn { padding: 0.375rem 0.625rem; font-size: 0.875rem; }
       .page-size-select { width: 5rem; } /* 80px в rem */
       .list { 
-        max-height: calc(100dvh - var(--header-height) - var(--pagination-height) - 0.625rem); /* Минимальное значение для маленьких экранов */
+        max-height: calc(100dvh - var(--header-height) - var(--pagination-height) - var(--pagination-offset) - 0.625rem); /* Минимальное значение для маленьких экранов */
       }
+      .to-top { bottom: calc(5.5vh + var(--pagination-offset) + 0.5rem); }
     }
   </style>
 </head>
