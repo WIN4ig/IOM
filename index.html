@@ -52,14 +52,16 @@
     .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; }
     .list::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 4px; }
     .list::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-    .list.centered-list { 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: center; 
-      align-items: center; 
-      gap: 12px; 
+    .item { 
+      background: var(--card); 
+      border: 1px solid var(--border); 
+      padding: 10px; 
+      border-radius: 14px; 
+      box-shadow: 0 2px 4px var(--shadow); 
+      transition: transform 0.2s, box-shadow 0.2s; 
+      height: auto; 
+      min-height: 0; 
     }
-    .item { background: var(--card); border: 1px solid var(--border); padding: 14px; border-radius: 14px; box-shadow: 0 2px 4px var(--shadow); transition: transform 0.2s, box-shadow 0.2s; }
     .item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); }
     .iom { font-weight: 600; font-size: 16px; }
     .pos { color: var(--muted); font-size: 14px; }
@@ -131,7 +133,7 @@
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
-      .item { padding: 12px; }
+      .item { padding: 10px; }
       .iom { font-size: 15px; }
       .pos { font-size: 13px; }
       .pagination { gap: 8px; }
