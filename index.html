@@ -22,15 +22,15 @@
       color: var(--text); 
       height: 100%; 
       margin: 0;
-      overflow: hidden; /* Disable body scrolling */
+      overflow: hidden;
     }
     .wrap { 
       max-width: 980px; 
       margin: 0 auto; 
       display: flex; 
       flex-direction: column; 
-      min-height: calc(100dvh - 60px); /* Adjusted for pagination height */
-      padding: 0 16px 60px; /* Bottom padding to prevent overlap with pagination */
+      min-height: calc(100dvh - 60px);
+      padding: 0 16px 60px;
     }
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
@@ -47,7 +47,6 @@
       scrollbar-color: var(--muted) var(--card); 
       flex: unset;
       min-height: auto;
-      /* max-height set dynamically via JavaScript */
     }
     .list::-webkit-scrollbar { width: 8px; }
     .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; }
@@ -119,7 +118,7 @@
     .to-top:hover { background: #1e2740; transform: scale(1.1); }
     .page-size-container { display: flex; align-items: center; gap: 5px; }
     .page-size-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
-    .page-size-select { width: 60px; text-align: center; }
+    .page-size-select { width: 80px; text-align: center; } /* Increased width for mobile */
 
     @media (max-width: 720px) {
       .controls { flex-direction: column; }
@@ -130,6 +129,7 @@
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
       .meta { flex-direction: column; align-items: flex-start; gap: 5px; }
       .page-size-container { margin-top: 5px; justify-content: flex-end; }
+      .page-size-select { width: 70px; } /* Adjusted for mobile */
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -138,7 +138,7 @@
       .pos { font-size: 13px; }
       .pagination { gap: 8px; }
       .page-btn { padding: 6px 12px; font-size: 14px; }
-      .page-size-select { width: 50px; }
+      .page-size-select { width: 60px; } /* Slightly smaller but sufficient */
     }
   </style>
 </head>
@@ -208,7 +208,6 @@
     const resultsEl = document.querySelector('.results');
     const paginationEl = document.querySelector('.pagination');
 
-    // Get bounding client rects for accurate heights including margins
     const headerHeight = headerEl.getBoundingClientRect().height + parseFloat(getComputedStyle(headerEl).marginBottom);
     const subHeight = subEl.getBoundingClientRect().height + parseFloat(getComputedStyle(subEl).marginBottom);
     const controlsHeight = controlsEl.getBoundingClientRect().height + parseFloat(getComputedStyle(controlsEl).marginTop) + parseFloat(getComputedStyle(controlsEl).marginBottom);
@@ -216,10 +215,8 @@
     const resultsHeight = resultsEl.offsetHeight > 0 ? resultsEl.getBoundingClientRect().height + parseFloat(getComputedStyle(resultsEl).marginBottom) : 0;
     const paginationHeight = paginationEl.getBoundingClientRect().height;
 
-    // Calculate total height above list plus pagination
     const totalHeightAbove = headerHeight + subHeight + controlsHeight + metaHeight + resultsHeight + paginationHeight;
 
-    // Set max-height to viewport height minus total height above
     listEl.style.maxHeight = `calc(100dvh - ${totalHeightAbove}px)`;
   }
 
@@ -280,16 +277,16 @@
     pageSizeContainer.className = 'page-size-container';
     const existingSelect = metaEl.querySelector('#page-size-select');
     if (items.length > 1 && !existingSelect) {
-      pageSizeContainer.innerHTML = 'ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select>';
+      pageSizeContainer.innerHTML = `ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option><option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option><option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option><option value="100" ${pageSize === 100 ? 'selected' : ''}>100</option></select>`;
       metaEl.appendChild(pageSizeContainer);
       const pageSizeSelect = document.getElementById('page-size-select');
       pageSizeSelect.addEventListener('change', () => {
         let newSize = parseInt(pageSizeSelect.value, 10);
-        if (isNaN(newSize) || newSize < 1) newSize = mattino50;
+        if (isNaN(newSize) || newSize < 1) newSize = 50;
         pageSize = newSize;
         currentPage = 1;
         render();
-        updateListMaxHeight(); // Update height when page size changes
+        updateListMaxHeight();
       });
     } else if (items.length <= 1 && existingSelect) {
       existingSelect.parentElement.remove();
@@ -310,7 +307,7 @@
     emptyMessageEl.style.display = items.length ? 'none' : 'block';
 
     updateToTopVisibility();
-    updateListMaxHeight(); // Update height after rendering
+    updateListMaxHeight();
 
     if (totalPages > 1) {
       paginationEl.style.display = 'flex';
@@ -335,10 +332,8 @@
 
   listEl.addEventListener('scroll', () => { updateToTopVisibility(); });
 
-  // Update list height on window resize
   window.addEventListener('resize', updateListMaxHeight);
 
-  // Initial render and height calculation
   updateListMaxHeight();
   render();
 })();
