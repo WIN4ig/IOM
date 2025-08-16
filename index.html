@@ -22,7 +22,7 @@
       color: var(--text); 
       overflow: hidden; /* Отключаем основной скролл */
     }
-    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 80px 16px; }
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 100px 16px; } /* Увеличен padding-bottom */
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
@@ -34,10 +34,10 @@
     .list { 
       display: grid; 
       gap: 12px; 
-      min-height: calc(100vh - 300px); 
-      max-height: calc(100vh - 300px); 
+      min-height: calc(100vh - 320px); /* Увеличена высота */
+      max-height: calc(100vh - 320px); 
       overflow-y: auto; 
-      padding-bottom: 10px; 
+      padding-bottom: 20px; /* Дополнительный отступ для последнего элемента */
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
     }
@@ -72,7 +72,7 @@
     .page-btn:hover:not(:disabled) { background: #1e2740; }
     .to-top { 
       position: fixed; 
-      bottom: 90px; 
+      bottom: 100px; /* Скорректировано для большего padding-bottom */
       right: 20px; 
       background: var(--card); 
       border: 1px solid var(--border); 
@@ -97,8 +97,8 @@
       .controls { flex-direction: column; }
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
-      .wrap { margin: 20px auto; padding: 0 12px 80px 12px; }
-      .list { min-height: calc(100vh - 250px); max-height: calc(100vh - 250px); }
+      .wrap { margin: 20px auto; padding: 0 12px 90px 12px; }
+      .list { min-height: calc(100vh - 270px); max-height: calc(100vh - 270px); }
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -107,7 +107,7 @@
       .pos { font-size: 13px; }
       .pagination { gap: 8px; padding: 8px; }
       .page-btn { padding: 6px 12px; font-size: 14px; }
-      .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
+      .to-top { bottom: 90px; right: 12px; width: 36px; height: 36px; }
     }
   </style>
 </head>
@@ -201,7 +201,7 @@
     // Показываем количество найденных ИОМов
     if (q || spec) {
       resultsEl.style.display = 'block';
-      resultsEl.innerHTML = `<strong>Найдено: ${items.length} ИОМов</strong>`;
+      resultsEl.innerHTML = `<strong>Найдено:</strong> ${items.length} <strong>ИОМов</strong>`;
     } else {
       resultsEl.style.display = 'none';
     }
