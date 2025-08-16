@@ -22,7 +22,7 @@
       color: var(--text); 
       overflow: hidden; /* Отключаем основной скролл */
     }
-    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px 100px 16px; } /* Оптимизирован padding-bottom */
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
@@ -34,10 +34,9 @@
     .list { 
       display: grid; 
       gap: 12px; 
-      min-height: 0; /* Убрана фиксированная высота, динамическая адаптация */
-      max-height: calc(100vh - 200px); /* Максимальная высота с учётом заголовков и фиксированных элементов */
+      min-height: 0; /* Динамическая адаптация */
       overflow-y: auto; 
-      padding-bottom: 80px; /* Увеличен для видимости последнего элемента */
+      padding-bottom: 120px; /* Увеличен для видимости последнего элемента с учётом навигации */
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
     }
@@ -54,26 +53,20 @@
     a:hover { color: #4a8dff; }
     .loader { text-align: center; padding: 20px; color: var(--muted); }
     .pagination { 
-      position: fixed; 
-      bottom: 0; 
-      left: 0; 
-      right: 0; 
       display: flex; 
       justify-content: center; 
       gap: 10px; 
-      margin: 0; 
+      margin: 20px 0; 
       padding: 10px; 
       background: var(--bg); 
       box-shadow: 0 -2px 4px var(--shadow); 
-      z-index: 10; 
     }
     .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
     .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .page-btn:hover:not(:disabled) { background: #1e2740; }
     .to-top { 
-      position: fixed; 
-      bottom: 90px; /* Скорректировано для баланса */
-      right: 20px; 
+      display: block; 
+      margin: 20px auto 0; 
       background: var(--card); 
       border: 1px solid var(--border); 
       color: var(--text); 
@@ -81,24 +74,23 @@
       height: 40px; 
       border-radius: 50%; 
       cursor: pointer; 
-      display: none; 
-      z-index: 10; 
       box-shadow: 0 2px 4px var(--shadow); 
-      transition: opacity 0.3s, transform 0.2s; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
+      transition: transform 0.2s; 
+      display: none; 
+      text-align: center; 
     }
-    .to-top.visible { display: flex; opacity: 1; }
-    .to-top:hover { background: #1e2740; transform: scale(1.1); }
+    .to-top.visible { display: block; }
+    .to-top:hover { transform: scale(1.1); }
+    .to-top svg { vertical-align: middle; }
 
     /* Responsive improvements */
     @media (max-width: 720px) {
       .controls { flex-direction: column; }
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
-      .wrap { margin: 20px auto; padding: 0 12px 80px 12px; }
-      .list { max-height: calc(100vh - 180px); }
+      .wrap { margin: 20px auto; padding: 0 12px; }
+      .pagination { margin: 16px 0; }
+      .to-top { margin: 16px auto 0; width: 36px; height: 36px; }
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -107,7 +99,6 @@
       .pos { font-size: 13px; }
       .pagination { gap: 8px; padding: 8px; }
       .page-btn { padding: 6px 12px; font-size: 14px; }
-      .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
     }
   </style>
 </head>
@@ -232,12 +223,10 @@
 
     // Восстанавливаем прокрутку внутри списка
     listEl.scrollTop = scrollPosition;
-  }
 
-  // Показ/скрытие кнопки "Наверх"
-  listEl.addEventListener('scroll', () => {
+    // Показ/скрытие кнопки "Наверх"
     toTopBtn.classList.toggle('visible', listEl.scrollTop > 200);
-  });
+  }
 
   // Обработчик для кнопки "Наверх"
   toTopBtn.addEventListener('click', () => {
@@ -255,6 +244,11 @@
   nextBtn.addEventListener('click', () => { 
     currentPage++; 
     render(currentPage); 
+  });
+
+  // Обновляем видимость кнопки "Наверх" при скролле
+  listEl.addEventListener('scroll', () => {
+    toTopBtn.classList.toggle('visible', listEl.scrollTop > 200);
   });
 
   render();
