@@ -33,6 +33,7 @@
       min-height: 100dvh; /* Минимальная высота для поддержки контента */
       padding: 0 16px; 
       padding-bottom: 60px; /* Пространство для фиксированной пагинации */
+      padding-top: 10px; /* Отступ сверху для избежания наложения */
     }
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
@@ -127,7 +128,7 @@
       h1 { font-size: 24px; }
       .wrap { padding: 0 12px; }
       .list { 
-        max-height: calc(100dvh - 200px); /* Ограничение высоты для мобильных */
+        max-height: calc(100dvh - 250px); /* Уменьшил высоту для мобильных */
       }
       .pagination { padding: 8px; }
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
@@ -140,9 +141,12 @@
       .item { padding: 10px; }
       .iom { font-size: 15px; }
       .pos { font-size: 13px; }
-      .pagination { gap: 8px; }
-      .page-btn { padding: 6px 12px; font-size: 14px; }
+      .pagination { gap: 6px; }
+      .page-btn { padding: 6px 10px; font-size: 14px; }
       .page-size-select { width: 80px; } /* Увеличил ширину для маленьких экранов */
+      .list { 
+        max-height: calc(100dvh - 200px); /* Дальнейшее уменьшение высоты */
+      }
     }
   </style>
 </head>
