@@ -1,1 +1,351 @@
-<!doctype html> <html lang="ru"> <head> <meta charset="utf-8" /> <meta name="viewport" content="width=device-width,initial-scale=1" /> <title>Рубрикатор ИОМ-КР / Должности</title> <style> :root { --bg: #0b0f16; --card: #141a24; --text: #e8eef6; --muted: #9fb0c3; --accent: #6aa9ff; --shadow: rgba(0,0,0,0.2); --border: #223048; } * { box-sizing: border-box; margin: 0; padding: 0; } html { scroll-behavior: smooth; height: 100%; } body { font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; background: var(--bg); color: var(--text); overflow: hidden; /* Отключаем основной скролл */ height: 100%; /* Полная высота для flex */ margin: 0; /* Убираем дефолтные отступы */ } .wrap { max-width: 980px; margin: 0 auto; /* Центрируем без верхнего/нижнего отступа */ display: flex; flex-direction: column; height: 100dvh; /* Используем 100dvh для динамической высоты */ padding: 0 16px; } h1 { font-size: 28px; margin: 0 0 16px; } .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; } .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; } .input, select { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; } .input:focus, select:focus { border-color: var(--accent); } .meta { font-size: 13px; color: var(--muted); margin: 8px 0 16px; display: flex; justify-content: space-between; align-items: center; } .results { font-size: 14px; color: var(--text); font-weight: bold; margin-bottom: 12px; display: none; } .list { display: grid; gap: 12px; flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--muted) var(--card); min-height: 0; /* Убеждаемся, что flex работает корректно */ } .list::-webkit-scrollbar { width: 8px; } .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; } .list::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 4px; } .list::-webkit-scrollbar-thumb:hover { background: var(--accent); } .item { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 14px; box-shadow: 0 2px 4px var(--shadow); transition: transform 0.2s, box-shadow 0.2s; height: auto; /* Адаптация высоты под содержимое */ } .item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); } .iom { font-weight: 600; font-size: 16px; } .pos { color: var(--muted); font-size: 14px; } .error-message { margin: 12px 0; padding: 10px; border-radius: 8px; font-size: 14px; text-align: center; box-shadow: 0 2px 4px var(--shadow); } .error-message.error { background: #ffe5e5; color: #a00; } /* Для "Ошибка загрузки данных" */ .error-message.empty { background: #fff3cd; color: #856404; } /* Для "Ничего не найдено" */ a { color: var(--accent); text-decoration: none; transition: color 0.2s; } a:hover { color: #4a8dff; } .loader { text-align: center; padding: 20px; color: var(--muted); } .pagination { flex-shrink: 0; display: flex; justify-content: center; gap: 10px; margin: 0; padding: 10px; background: var(--bg); box-shadow: 0 -2px 4px var(--shadow); z-index: 10; } .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; } .page-btn:disabled { opacity: 0.5; cursor: not-allowed; } .page-btn:hover:not(:disabled) { background: #1e2740; } .to-top { position: fixed; bottom: 90px; right: 20px; background: var(--card); border: 1px solid var(--border); color: var(--text); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: none; z-index: 10; box-shadow: 0 2px 4px var(--shadow); transition: opacity 0.3s, transform 0.2s; display: flex; align-items: center; justify-content: center; } .to-top.visible { display: flex; opacity: 1; } .to-top:hover { background: #1e2740; transform: scale(1.1); } .page-size-container { display: flex; align-items: center; gap: 5px; } .page-size-label { font-size: 13px; color: var(--muted); white-space: nowrap; } .page-size-select { width: 60px; text-align: center; } /* Responsive improvements */ @media (max-width: 720px) { .controls { flex-direction: column; } .input, select { width: 100%; } h1 { font-size: 24px; } .wrap { padding: 0 12px; } .list { max-height: calc(100dvh - 200px); /* Ограничение высоты для мобильных */ } .pagination { padding: 8px; } .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; } .meta { flex-direction: column; align-items: flex-start; gap: 5px; } .page-size-container { margin-top: 5px; justify-content: flex-end; } } @media (max-width: 480px) { body { font-size: 14px; } .item { padding: 10px; } .iom { font-size: 15px; } .pos { font-size: 13px; } .pagination { gap: 8px; } .page-btn { padding: 6px 12px; font-size: 14px; } .page-size-select { width: 50px; } } </style> </head> <body> <div class="wrap"> <h1>Рубрикатор: ИОМ-КР / Должности</h1> <div class="sub">Выберите врачебную специальность или воспользуйтесь поиском по специальности/ИОМ</div> <div class="controls"> <input id="search" class="input" placeholder="Поиск по ИОМ/Должности…" /> <select id="spec"></select> </div> <div id="error-message" class="error-message error" style="display: none;"> Ошибка загрузки данных. Попробуйте обновить страницу позже. </div> <div id="empty-message" class="error-message empty" style="display: none;"> Ничего не найдено. Измените фильтры или поиск. </div> <div class="meta" id="meta"></div> <div class="results" id="results"></div> <div id="list" class="list"></div> <div id="loader" class="loader" style="display:none">Загрузка данных...</div> <div class="pagination" id="pagination" style="display:none"> <button class="page-btn" id="prev" aria-label="Предыдущая страница">Назад</button> <span id="page-info"></span> <button class="page-btn" id="next" aria-label="Следующая страница">Далее</button> </div> </div> <button class="to-top" id="to-top" aria-label="Вернуться наверх"> <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"> <path d="M12 19V5M5 12l7-7 7 7"/> </svg> </button> <script> (async function(){ const dataUrl = 'data/matrix.json?v=' + Date.now(); // кэш-бан const specEl = document.getElementById('spec'); const listEl = document.getElementById('list'); const errorMessageEl = document.getElementById('error-message'); const emptyMessageEl = document.getElementById('empty-message'); const searchEl = document.getElementById('search'); const metaEl = document.getElementById('meta'); const resultsEl = document.getElementById('results'); const loaderEl = document.getElementById('loader'); const paginationEl = document.getElementById('pagination'); const prevBtn = document.getElementById('prev'); const nextBtn = document.getElementById('next'); const pageInfoEl = document.getElementById('page-info'); const toTopBtn = document.getElementById('to-top'); let raw = { items: [], specialties: [], updated_at: null }; let currentPage = 1; let pageSize = 50; // Начальное значение let isDataLoaded = false; // Флаг успешной загрузки данных // Показываем лоадер loaderEl.style.display = 'block'; try { const res = await fetch(dataUrl); if (!res.ok) throw new Error('HTTP ' + res.status); raw = await res.json(); isDataLoaded = true; // Устанавливаем флаг, если данные загружены } catch (e) { listEl.innerHTML = ''; errorMessageEl.style.display = 'block'; console.error(e); loaderEl.style.display = 'none'; toTopBtn.style.display = 'none'; // Явно скрываем кнопку при ошибке return; } loaderEl.style.display = 'none'; // Заполняем селект специальностей specEl.innerHTML = <option value="">Все специальности</option> + raw.specialties.map(s => <option>${s}</option>).join(''); // Метаданные const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—'; metaEl.innerHTML = ${raw.items.length} записей • обновлено: ${d} • источник Минздрав; function updateToTopVisibility() { if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') { const hasScroll = listEl.scrollHeight > listEl.clientHeight; const isScrolled = listEl.scrollTop > 0; toTopBtn.style.display = hasScroll && isScrolled ? 'flex' : 'none'; // Явное управление display toTopBtn.classList.toggle('visible', hasScroll && isScrolled); } else { toTopBtn.style.display = 'none'; // Явно скрываем кнопку toTopBtn.classList.remove('visible'); } } function render(page = 1) { // Сохраняем позицию прокрутки внутри списка const scrollPosition = listEl.scrollTop; const q = (searchEl.value || '').trim().toLowerCase(); const spec = specEl.value; let items = raw.items; if (spec) items = items.filter(i => i.specialty === spec); if (q) { items = items.filter(i => (i.iom && i.iom.toLowerCase().includes(q)) || (i.position && i.position.toLowerCase().includes(q)) ); } // Показываем количество найденных ИОМов if (q || spec) { resultsEl.style.display = 'block'; resultsEl.textContent = Найдено: ${items.length} ИОМ; } else { resultsEl.style.display = 'none'; } // Управление видимостью поля pageSize const pageSizeContainer = document.createElement('div'); pageSizeContainer.className = 'page-size-container'; const existingSelect = metaEl.querySelector('#page-size-select'); if (items.length > 1 && !existingSelect) { pageSizeContainer.innerHTML = 'ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select>'; metaEl.appendChild(pageSizeContainer); const pageSizeSelect = document.getElementById('page-size-select'); pageSizeSelect.addEventListener('change', () => { let newSize = parseInt(pageSizeSelect.value, 10); if (isNaN(newSize) || newSize < 1) newSize = 50; pageSize = newSize; currentPage = 1; // Сбрасываем на первую страницу render(); }); } else if (items.length <= 1 && existingSelect) { existingSelect.parentElement.remove(); } // Пагинация const totalPages = Math.ceil(items.length / pageSize); const start = (page - 1) * pageSize; const paginatedItems = items.slice(start, start + pageSize); listEl.innerHTML = paginatedItems.map((i, index) => <div class="item" data-index="${index}"> <div class="iom">${i.iom || '—'}</div> <div class="pos" style="margin-top:6px"><span style="opacity:.6">Специальность:</span> ${i.specialty || '—'}</div> </div> ).join(''); // Управляем отображением сообщений errorMessageEl.style.display = 'none'; // Скрываем сообщение об ошибке загрузки emptyMessageEl.style.display = items.length ? 'none' : 'block'; // Показываем "Ничего не найдено" при пустом списке // Обновляем видимость кнопки "Наверх" updateToTopVisibility(); // Пагинация контролы if (totalPages > 1) { paginationEl.style.display = 'flex'; pageInfoEl.textContent = Страница ${page} из ${totalPages}; prevBtn.disabled = page === 1; nextBtn.disabled = page === totalPages; } else { paginationEl.style.display = 'none'; } // Восстанавливаем прокрутку внутри списка listEl.scrollTop = scrollPosition; } // Обработчик для кнопки "Наверх" toTopBtn.addEventListener('click', () => { listEl.scrollTo({ top: 0, behavior: 'smooth' }); }); specEl.addEventListener('change', () => { currentPage = 1; render(); }); searchEl.addEventListener('input', () => { currentPage = 1; render(); }); prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; render(currentPage); } }); nextBtn.addEventListener('click', () => { currentPage++; render(currentPage); }); // Обновляем видимость кнопки "Наверх" при скролле listEl.addEventListener('scroll', () => { updateToTopVisibility(); }); render(); })(); </script> </body> </html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Рубрикатор ИОМ-КР / Должности</title>
+  <style>
+    :root { 
+      --bg: #0b0f16; 
+      --card: #141a24; 
+      --text: #e8eef6; 
+      --muted: #9fb0c3; 
+      --accent: #6aa9ff; 
+      --shadow: rgba(0,0,0,0.2); 
+      --border: #223048;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; height: 100%; }
+    body { 
+      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; 
+      background: var(--bg); 
+      color: var(--text); 
+      overflow: hidden; /* Отключаем скролл тела */
+      height: 100%; /* Полная высота для flex */
+      margin: 0; /* Убираем дефолтные отступы */
+      position: relative; /* Для правильного позиционирования */
+    }
+    .wrap { 
+      max-width: 980px; 
+      margin: 0 auto; /* Центрируем без верхнего/нижнего отступа */
+      display: flex; 
+      flex-direction: column; 
+      min-height: 100dvh; /* Минимальная высота для поддержки контента */
+      padding: 0 16px; 
+      padding-bottom: 60px; /* Пространство для пагинации */
+    }
+    h1 { font-size: 28px; margin: 0 0 16px; }
+    .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
+    .input, select { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; }
+    .input:focus, select:focus { border-color: var(--accent); }
+    .meta { font-size: 13px; color: var(--muted); margin: 8px 0 16px; display: flex; justify-content: space-between; align-items: center; }
+    .results { font-size: 14px; color: var(--text); font-weight: bold; margin-bottom: 12px; display: none; }
+    .list { 
+      display: grid; 
+      gap: 12px; 
+      overflow-y: auto; 
+      scrollbar-width: thin; 
+      scrollbar-color: var(--muted) var(--card); 
+      max-height: calc(100dvh - 200px); /* Ограничение высоты с учётом шапки и пагинации */
+    }
+    .list::-webkit-scrollbar { width: 8px; }
+    .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; }
+    .list::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 4px; }
+    .list::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    .item { 
+      background: var(--card); 
+      border: 1px solid var(--border); 
+      padding: 10px; 
+      border-radius: 14px; 
+      box-shadow: 0 2px 4px var(--shadow); 
+      transition: transform 0.2s, box-shadow 0.2s; 
+      min-height: 60px; /* Минимальная высота для .item */
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; /* Центрируем содержимое */
+    }
+    .item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); }
+    .iom { font-weight: 600; font-size: 16px; }
+    .pos { color: var(--muted); font-size: 14px; }
+    .error-message {
+      margin: 12px 0;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      text-align: center;
+      box-shadow: 0 2px 4px var(--shadow);
+    }
+    .error-message.error { background: #ffe5e5; color: #a00; } /* Для "Ошибка загрузки данных" */
+    .error-message.empty { background: #fff3cd; color: #856404; } /* Для "Ничего не найдено" */
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: #4a8dff; }
+    .loader { text-align: center; padding: 20px; color: var(--muted); }
+    .pagination { 
+      display: flex; 
+      justify-content: center; 
+      gap: 10px; 
+      padding: 10px; 
+      background: var(--bg); 
+      box-shadow: 0 -2px 4px var(--shadow); 
+      z-index: 10; 
+      position: fixed; /* Фиксируем внизу */
+      bottom: 0; 
+      left: 0; 
+      width: 100%; 
+      background: inherit; 
+    }
+    .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+    .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .page-btn:hover:not(:disabled) { background: #1e2740; }
+    .to-top { 
+      position: fixed; 
+      bottom: 90px; 
+      right: 20px; 
+      background: var(--card); 
+      border: 1px solid var(--border); 
+      color: var(--text); 
+      width: 40px; 
+      height: 40px; 
+      border-radius: 50%; 
+      cursor: pointer; 
+      display: none; 
+      z-index: 10; 
+      box-shadow: 0 2px 4px var(--shadow); 
+      transition: opacity 0.3s, transform 0.2s; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+    }
+    .to-top.visible { display: flex; opacity: 1; }
+    .to-top:hover { background: #1e2740; transform: scale(1.1); }
+    .page-size-container { display: flex; align-items: center; gap: 5px; }
+    .page-size-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .page-size-select { width: 90px; text-align: center; } /* Увеличил ширину до 90px для мобильных */
+
+    /* Responsive improvements */
+    @media (max-width: 720px) {
+      .controls { flex-direction: column; }
+      .input, select { width: 100%; }
+      h1 { font-size: 24px; }
+      .wrap { padding: 0 12px; }
+      .list { 
+        max-height: calc(100dvh - 220px); /* Уменьшил высоту для мобильных */
+      }
+      .pagination { padding: 8px; }
+      .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
+      .meta { flex-direction: column; align-items: flex-start; gap: 5px; }
+      .page-size-container { margin-top: 5px; justify-content: flex-end; }
+      .page-size-select { width: 90px; } /* Увеличил ширину для мобильных */
+    }
+    @media (max-width: 480px) {
+      body { font-size: 14px; }
+      .item { min-height: 50px; } /* Уменьшил минимальную высоту для маленьких экранов */
+      .iom { font-size: 15px; }
+      .pos { font-size: 13px; }
+      .pagination { gap: 6px; }
+      .page-btn { padding: 6px 10px; font-size: 14px; }
+      .page-size-select { width: 80px; } /* Увеличил ширину для маленьких экранов */
+      .list { 
+        max-height: calc(100dvh - 180px); /* Дальнейшее уменьшение высоты */
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Рубрикатор: ИОМ-КР / Должности</h1>
+    <div class="sub">Выберите врачебную специальность или воспользуйтесь поиском по специальности/ИОМ</div>
+
+    <div class="controls">
+      <input id="search" class="input" placeholder="Поиск по ИОМ/Должности…" />
+      <select id="spec"></select>
+    </div>
+
+    <div id="error-message" class="error-message error" style="display: none;">
+      Ошибка загрузки данных. Попробуйте обновить страницу позже.
+    </div>
+
+    <div id="empty-message" class="error-message empty" style="display: none;">
+      Ничего не найдено. Измените фильтры или поиск.
+    </div>
+
+    <div class="meta" id="meta"></div>
+    <div class="results" id="results"></div>
+    <div id="list" class="list"></div>
+    <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
+    <div class="pagination" id="pagination" style="display:none">
+      <button class="page-btn" id="prev" aria-label="Предыдущая страница">Назад</button>
+      <span id="page-info"></span>
+      <button class="page-btn" id="next" aria-label="Следующая страница">Далее</button>
+    </div>
+  </div>
+  <button class="to-top" id="to-top" aria-label="Вернуться наверх">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 19V5M5 12l7-7 7 7"/>
+    </svg>
+  </button>
+
+<script>
+(async function(){
+  const dataUrl = 'data/matrix.json?v=' + Date.now(); // кэш-бан
+  const specEl = document.getElementById('spec');
+  const listEl = document.getElementById('list');
+  const errorMessageEl = document.getElementById('error-message');
+  const emptyMessageEl = document.getElementById('empty-message');
+  const searchEl = document.getElementById('search');
+  const metaEl = document.getElementById('meta');
+  const resultsEl = document.getElementById('results');
+  const loaderEl = document.getElementById('loader');
+  const paginationEl = document.getElementById('pagination');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const pageInfoEl = document.getElementById('page-info');
+  const toTopBtn = document.getElementById('to-top');
+
+  let raw = { items: [], specialties: [], updated_at: null };
+  let currentPage = 1;
+  let pageSize = 50; // Начальное значение
+  let isDataLoaded = false; // Флаг успешной загрузки данных
+
+  // Показываем лоадер
+  loaderEl.style.display = 'block';
+
+  try {
+    const res = await fetch(dataUrl);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    raw = await res.json();
+    isDataLoaded = true; // Устанавливаем флаг, если данные загружены
+  } catch (e) {
+    listEl.innerHTML = '';
+    errorMessageEl.style.display = 'block';
+    console.error(e);
+    loaderEl.style.display = 'none';
+    toTopBtn.style.display = 'none'; // Явно скрываем кнопку при ошибке
+    return;
+  }
+
+  loaderEl.style.display = 'none';
+
+  // Заполняем селект специальностей
+  specEl.innerHTML = `<option value="">Все специальности</option>` + raw.specialties.map(s => `<option>${s}</option>`).join('');
+
+  // Метаданные
+  const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
+  metaEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
+
+  function updateToTopVisibility() {
+    if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
+      const hasScroll = listEl.scrollHeight > listEl.clientHeight;
+      const isScrolled = listEl.scrollTop > 0;
+      toTopBtn.style.display = hasScroll && isScrolled ? 'flex' : 'none'; // Явное управление display
+      toTopBtn.classList.toggle('visible', hasScroll && isScrolled);
+    } else {
+      toTopBtn.style.display = 'none'; // Явно скрываем кнопку
+      toTopBtn.classList.remove('visible');
+    }
+  }
+
+  function render(page = 1) {
+    // Сохраняем позицию прокрутки внутри списка
+    const scrollPosition = listEl.scrollTop;
+
+    const q = (searchEl.value || '').trim().toLowerCase();
+    const spec = specEl.value;
+    let items = raw.items;
+    if (spec) items = items.filter(i => i.specialty === spec);
+    if (q) {
+      items = items.filter(i =>
+        (i.iom && i.iom.toLowerCase().includes(q)) ||
+        (i.position && i.position.toLowerCase().includes(q))
+      );
+    }
+
+    // Показываем количество найденных ИОМов
+    if (q || spec) {
+      resultsEl.style.display = 'block';
+      resultsEl.textContent = `Найдено: ${items.length} ИОМ`;
+    } else {
+      resultsEl.style.display = 'none';
+    }
+
+    // Управление видимостью поля pageSize
+    const pageSizeContainer = document.createElement('div');
+    pageSizeContainer.className = 'page-size-container';
+    const existingSelect = metaEl.querySelector('#page-size-select');
+    if (items.length > 1 && !existingSelect) {
+      pageSizeContainer.innerHTML = 'ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select>';
+      metaEl.appendChild(pageSizeContainer);
+      const pageSizeSelect = document.getElementById('page-size-select');
+      pageSizeSelect.addEventListener('change', () => {
+        let newSize = parseInt(pageSizeSelect.value, 10);
+        if (isNaN(newSize) || newSize < 1) newSize = 50;
+        pageSize = newSize;
+        currentPage = 1; // Сбрасываем на первую страницу
+        render();
+      });
+    } else if (items.length <= 1 && existingSelect) {
+      existingSelect.parentElement.remove();
+    }
+
+    // Пагинация
+    const totalPages = Math.ceil(items.length / pageSize);
+    const start = (page - 1) * pageSize;
+    const paginatedItems = items.slice(start, start + pageSize);
+
+    listEl.innerHTML = paginatedItems.map((i, index) => `
+      <div class="item" data-index="${index}">
+        <div class="iom">${i.iom || '—'}</div>
+        <div class="pos" style="margin-top:6px"><span style="opacity:.6">Специальность:</span> ${i.specialty || '—'}</div>
+      </div>
+    `).join('');
+
+    // Управляем отображением сообщений
+    errorMessageEl.style.display = 'none'; // Скрываем сообщение об ошибке загрузки
+    emptyMessageEl.style.display = items.length ? 'none' : 'block'; // Показываем "Ничего не найдено" при пустом списке
+
+    // Обновляем видимость кнопки "Наверх"
+    updateToTopVisibility();
+
+    // Пагинация контролы
+    if (totalPages > 1) {
+      paginationEl.style.display = 'flex';
+      pageInfoEl.textContent = `Страница ${page} из ${totalPages}`;
+      prevBtn.disabled = page === 1;
+      nextBtn.disabled = page === totalPages;
+    } else {
+      paginationEl.style.display = 'none';
+    }
+
+    // Восстанавливаем прокрутку внутри списка
+    listEl.scrollTop = scrollPosition;
+  }
+
+  // Обработчик для кнопки "Наверх"
+  toTopBtn.addEventListener('click', () => {
+    listEl.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  specEl.addEventListener('change', () => { currentPage = 1; render(); });
+  searchEl.addEventListener('input', () => { currentPage = 1; render(); });
+  prevBtn.addEventListener('click', () => { 
+    if (currentPage > 1) { 
+      currentPage--; 
+      render(currentPage); 
+    } 
+  });
+  nextBtn.addEventListener('click', () => { 
+    currentPage++; 
+    render(currentPage); 
+  });
+
+  // Обновляем видимость кнопки "Наверх" при скролле
+  listEl.addEventListener('scroll', () => {
+    updateToTopVisibility();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
