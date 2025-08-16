@@ -22,14 +22,15 @@
       color: var(--text); 
       height: 100%; 
       margin: 0;
+      overflow: hidden; /* Disable body scrolling */
     }
     .wrap { 
       max-width: 980px; 
       margin: 0 auto; 
       display: flex; 
       flex-direction: column; 
-      min-height: 100dvh; 
-      padding: 0 16px; 
+      min-height: calc(100dvh - 60px); /* Adjusted for pagination height */
+      padding: 0 16px 60px; /* Bottom padding to prevent overlap with pagination */
     }
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
@@ -44,9 +45,9 @@
       overflow-y: auto; 
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
-      flex: unset;          /* убрано растягивание */
-      min-height: auto;     /* чтобы не было фиксации */
-      max-height: 70dvh;    /* ограничение: много элементов = скролл */
+      flex: unset;
+      min-height: auto;
+      max-height: calc(100dvh - 220px); /* Adjusted for header and pagination */
     }
     .list::-webkit-scrollbar { width: 8px; }
     .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; }
@@ -84,11 +85,14 @@
       display: flex; 
       justify-content: center; 
       gap: 10px; 
-      margin: 12px 0; 
       padding: 10px; 
       background: var(--bg); 
       box-shadow: 0 -2px 4px var(--shadow); 
       z-index: 10; 
+      position: fixed; /* Fixed to bottom */
+      bottom: 0; 
+      left: 0; 
+      width: 100%;
     }
     .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
     .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -121,8 +125,8 @@
       .controls { flex-direction: column; }
       .input, select { width: 100%; }
       h1 { font-size: 24px; }
-      .wrap { padding: 0 12px; }
-      .list { max-height: calc(100dvh - 220px); }
+      .wrap { padding: 0 12px 60px; } /* Adjusted padding */
+      .list { max-height: calc(100dvh - 280px); } /* Adjusted for header and pagination */
       .pagination { padding: 8px; }
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
       .meta { flex-direction: column; align-items: flex-start; gap: 5px; }
@@ -160,11 +164,12 @@
     <div class="results" id="results"></div>
     <div id="list" class="list"></div>
     <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
-    <div class="pagination" id="pagination" style="display:none">
-      <button class="page-btn" id="prev" aria-label="Предыдущая страница">Назад</button>
-      <span id="page-info"></span>
-      <button class="page-btn" id="next" aria-label="Следующая страница">Далее</button>
-    </div>
+  </div>
+
+  <div class="pagination" id="pagination">
+    <button class="page-btn" id="prev" aria-label="Предыдущая страница">Назад</button>
+    <span id="page-info">Страница 1 из 44</span>
+    <button class="page-btn" id="next" aria-label="Следующая страница">Далее</button>
   </div>
 
   <button class="to-top" id="to-top" aria-label="Вернуться наверх">
