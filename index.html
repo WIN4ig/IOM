@@ -35,8 +35,8 @@
     h1 { font-size: 28px; margin: 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 24px; }
-    .input, select, .page-size-input { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; }
-    .input:focus, select:focus, .page-size-input:focus { border-color: var(--accent); }
+    .input, select { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; }
+    .input:focus, select:focus { border-color: var(--accent); }
     .meta { font-size: 13px; color: var(--muted); margin: 8px 0 16px; display: flex; justify-content: space-between; align-items: center; }
     .results { font-size: 14px; color: var(--text); font-weight: bold; margin-bottom: 12px; display: none; }
     .list { 
@@ -106,9 +106,7 @@
     .to-top:hover { background: #1e2740; transform: scale(1.1); }
     .page-size-container { display: flex; align-items: center; gap: 5px; }
     .page-size-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
-    .page-size-input { width: 60px; text-align: center; }
     .page-size-select { width: 60px; text-align: center; }
-    .manual-input-btn { cursor: pointer; color: var(--accent); font-size: 12px; padding-left: 5px; }
 
     /* Responsive improvements */
     @media (max-width: 720px) {
@@ -131,8 +129,7 @@
       .pos { font-size: 13px; }
       .pagination { gap: 8px; }
       .page-btn { padding: 6px 12px; font-size: 14px; }
-      .page-size-input, .page-size-select { width: 50px; }
-      .manual-input-btn { font-size: 10px; }
+      .page-size-select { width: 50px; }
     }
   </style>
 </head>
@@ -257,46 +254,19 @@
     const pageSizeContainer = document.createElement('div');
     pageSizeContainer.className = 'page-size-container';
     const existingSelect = metaEl.querySelector('#page-size-select');
-    const existingInput = metaEl.querySelector('#page-size-input');
-    if (items.length > 1 && (!existingSelect || !existingInput)) {
-      pageSizeContainer.innerHTML = 'ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select> <span id="manual-input-btn" class="manual-input-btn">(вручную)</span> <input type="number" id="page-size-input" class="page-size-input" value="' + pageSize + '" min="1" style="display:none;">';
+    if (items.length > 1 && !existingSelect) {
+      pageSizeContainer.innerHTML = 'ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select>';
       metaEl.appendChild(pageSizeContainer);
       const pageSizeSelect = document.getElementById('page-size-select');
-      const pageSizeInput = document.getElementById('page-size-input');
-      const manualInputBtn = document.getElementById('manual-input-btn');
       pageSizeSelect.addEventListener('change', () => {
         let newSize = parseInt(pageSizeSelect.value, 10);
         if (isNaN(newSize) || newSize < 1) newSize = 50;
         pageSize = newSize;
-        pageSizeInput.value = newSize;
         currentPage = 1; // Сбрасываем на первую страницу
         render();
       });
-      manualInputBtn.addEventListener('click', () => {
-        pageSizeSelect.style.display = 'none';
-        manualInputBtn.style.display = 'none';
-        pageSizeInput.style.display = 'inline-block';
-        pageSizeInput.focus();
-      });
-      pageSizeInput.addEventListener('change', () => {
-        let newSize = parseInt(pageSizeInput.value, 10);
-        if (isNaN(newSize) || newSize < 1) {
-          newSize = 50; // Значение по умолчанию, если ввод некорректен
-          pageSizeInput.value = newSize;
-        }
-        pageSize = newSize;
-        pageSizeSelect.value = newSize;
-        currentPage = 1; // Сбрасываем на первую страницу
-        render();
-      });
-      pageSizeInput.addEventListener('blur', () => {
-        pageSizeSelect.style.display = 'inline-block';
-        manualInputBtn.style.display = 'inline';
-        pageSizeInput.style.display = 'none';
-        render();
-      });
-    } else if (items.length <= 1 && (existingSelect || existingInput)) {
-      if (existingSelect) existingSelect.parentElement.remove();
+    } else if (items.length <= 1 && existingSelect) {
+      existingSelect.parentElement.remove();
     }
 
     // Пагинация
