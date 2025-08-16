@@ -15,7 +15,6 @@
       --border: #223048;
       --header-height: 10vh; /* Относительная высота шапки */
       --pagination-height: 8vh; /* Относительная высота пагинации */
-      --pagination-offset: 1vh; /* Отступ от нижнего края */
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; height: 100%; }
@@ -23,17 +22,17 @@
       font: 1rem/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; 
       background: var(--bg); 
       color: var(--text); 
-      height: 100%; /* Полная высота для flex */
-      margin: 0; /* Убираем дефолтные отступы */
-      position: relative; /* Для правильного позиционирования */
+      height: 100%; 
+      margin: 0; 
+      position: relative; 
     }
     .wrap { 
-      max-width: 90vw; /* Относительная максимальная ширина */
-      margin: 0 auto; /* Центрируем без верхнего/нижнего отступа */
+      max-width: 90vw; 
+      margin: 0 auto; 
       display: flex; 
       flex-direction: column; 
-      min-height: 100dvh; /* Полная высота экрана */
-      padding: 0 1rem 0.5rem; /* Отступ снизу для пагинации */
+      min-height: 100vh; 
+      padding: 0 1rem 1rem; /* Отступ снизу для пагинации */
     }
     h1 { font-size: 1.75rem; margin: 0 0 1rem; }
     .sub { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.875rem; }
@@ -48,7 +47,8 @@
       overflow-y: auto; 
       scrollbar-width: thin; 
       scrollbar-color: var(--muted) var(--card); 
-      max-height: calc(100vh - var(--header-height) - var(--pagination-height) - var(--pagination-offset)); /* Динамическая высота с учётом шапки и пагинации */
+      flex: 1 0 auto; /* Занимает только нужное пространство */
+      max-height: calc(100vh - var(--header-height) - var(--pagination-height)); /* Ограничиваем высоту */
     }
     .list::-webkit-scrollbar { width: 0.5rem; }
     .list::-webkit-scrollbar-track { background: var(--card); border-radius: 0.25rem; }
@@ -61,11 +61,11 @@
       border-radius: 0.875rem; 
       box-shadow: 0 0.125rem 0.25rem var(--shadow); 
       transition: transform 0.2s, box-shadow 0.2s; 
-      min-height: 3.75rem; /* Минимальная высота, но не растягивается */
+      min-height: 3.75rem; /* Минимальная высота */
       max-height: 3.75rem; /* Ограничиваем максимальную высоту */
       display: flex; 
       flex-direction: column; 
-      justify-content: center; /* Центрируем содержимое */
+      justify-content: center; 
     }
     .item:hover { transform: translateY(-0.125rem); box-shadow: 0 0.25rem 0.5rem var(--shadow); }
     .iom { font-weight: 600; font-size: 1rem; }
@@ -90,17 +90,18 @@
       padding: 0.625rem; 
       background: var(--bg); 
       box-shadow: 0 -0.125rem 0.25rem var(--shadow); 
-      position: relative; /* Убираем fixed, чтобы было в потоке */
-      height: var(--pagination-height); /* Относительная высота */
-      flex-shrink: 0; /* Не сжимается */
-      margin-top: 0.5rem; /* Небольшой отступ сверху */
+      position: sticky; /* Прилипает к низу при прокрутке */
+      bottom: 0; 
+      width: 100%; 
+      height: var(--pagination-height); 
+      flex-shrink: 0; 
     }
     .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: background 0.2s; }
     .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .page-btn:hover:not(:disabled) { background: #1e2740; }
     .to-top { 
       position: fixed; 
-      bottom: calc(var(--pagination-height) + var(--pagination-offset) + 1.25rem); /* Сдвигаем выше пагинации */
+      bottom: calc(var(--pagination-height) + 1.25rem); /* Сдвигаем выше пагинации */
       right: 1.25rem; 
       background: var(--card); 
       border: 1px solid var(--border); 
@@ -121,35 +122,30 @@
     .to-top:hover { background: #1e2740; transform: scale(1.1); }
     .page-size-container { display: flex; align-items: center; gap: 0.3125rem; }
     .page-size-label { font-size: 0.8125rem; color: var(--muted); white-space: nowrap; }
-    .page-size-select { width: 5.625rem; text-align: center; } /* 90px в rem */
+    .page-size-select { width: 5.625rem; text-align: center; }
 
-    /* Responsive improvements */
     @media (max-width: 720px) {
       .controls { flex-direction: column; }
       .input, select { width: 100%; }
       h1 { font-size: 1.5rem; }
       .wrap { padding: 0 0.75rem; }
-      .list { 
-        max-height: calc(100vh - var(--header-height) - var(--pagination-height) - var(--pagination-offset)); /* Адаптация для мобильных */
-      }
-      .pagination { padding: 0.5rem; height: 6vh; } /* Уменьшенная относительная высота */
-      .to-top { bottom: calc(6vh + var(--pagination-offset) + 0.75rem); right: 0.75rem; width: 2.25rem; height: 2.25rem; }
+      .list { max-height: calc(100vh - var(--header-height) - var(--pagination-height)); }
+      .pagination { padding: 0.5rem; height: 6vh; }
+      .to-top { bottom: calc(6vh + 0.75rem); right: 0.75rem; width: 2.25rem; height: 2.25rem; }
       .meta { flex-direction: column; align-items: flex-start; gap: 0.3125rem; }
       .page-size-container { margin-top: 0.3125rem; justify-content: flex-end; }
       .page-size-select { width: 5.625rem; }
     }
     @media (max-width: 480px) {
       body { font-size: 0.875rem; }
-      .item { min-height: 3.125rem; max-height: 3.125rem; } /* Адаптация для маленьких экранов */
+      .item { min-height: 3.125rem; max-height: 3.125rem; }
       .iom { font-size: 0.9375rem; }
       .pos { font-size: 0.8125rem; }
       .pagination { gap: 0.375rem; height: 5.5vh; }
       .page-btn { padding: 0.375rem 0.625rem; font-size: 0.875rem; }
-      .page-size-select { width: 5rem; } /* 80px в rem */
-      .list { 
-        max-height: calc(100vh - var(--header-height) - var(--pagination-height) - var(--pagination-offset)); /* Адаптация для маленьких экранов */
-      }
-      .to-top { bottom: calc(5.5vh + var(--pagination-offset) + 0.5rem); }
+      .page-size-select { width: 5rem; }
+      .list { max-height: calc(100vh - var(--header-height) - var(--pagination-height)); }
+      .to-top { bottom: calc(5.5vh + 0.5rem); }
     }
   </style>
 </head>
@@ -239,16 +235,15 @@
     if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
       const hasScroll = listEl.scrollHeight > listEl.clientHeight;
       const isScrolled = listEl.scrollTop > 0;
-      toTopBtn.style.display = hasScroll && isScrolled ? 'flex' : 'none'; // Явное управление display
+      toTopBtn.style.display = hasScroll && isScrolled ? 'flex' : 'none';
       toTopBtn.classList.toggle('visible', hasScroll && isScrolled);
     } else {
-      toTopBtn.style.display = 'none'; // Явно скрываем кнопку
+      toTopBtn.style.display = 'none';
       toTopBtn.classList.remove('visible');
     }
   }
 
   function render(page = 1) {
-    // Сохраняем позицию прокрутки внутри списка
     const scrollPosition = listEl.scrollTop;
 
     const q = (searchEl.value || '').trim().toLowerCase();
@@ -262,7 +257,6 @@
       );
     }
 
-    // Показываем количество найденных ИОМов
     if (q || spec) {
       resultsEl.style.display = 'block';
       resultsEl.textContent = `Найдено: ${items.length} ИОМ`;
@@ -270,7 +264,6 @@
       resultsEl.style.display = 'none';
     }
 
-    // Управление видимостью поля pageSize
     const pageSizeContainer = document.createElement('div');
     pageSizeContainer.className = 'page-size-container';
     const existingSelect = metaEl.querySelector('#page-size-select');
@@ -282,14 +275,13 @@
         let newSize = parseInt(pageSizeSelect.value, 10);
         if (isNaN(newSize) || newSize < 1) newSize = 50;
         pageSize = newSize;
-        currentPage = 1; // Сбрасываем на первую страницу
+        currentPage = 1;
         render();
       });
     } else if (items.length <= 1 && existingSelect) {
       existingSelect.parentElement.remove();
     }
 
-    // Пагинация
     const totalPages = Math.ceil(items.length / pageSize);
     const start = (page - 1) * pageSize;
     const paginatedItems = items.slice(start, start + pageSize);
@@ -301,14 +293,11 @@
       </div>
     `).join('');
 
-    // Управляем отображением сообщений
-    errorMessageEl.style.display = 'none'; // Скрываем сообщение об ошибке загрузки
-    emptyMessageEl.style.display = items.length ? 'none' : 'block'; // Показываем "Ничего не найдено" при пустом списке
+    errorMessageEl.style.display = 'none';
+    emptyMessageEl.style.display = items.length ? 'none' : 'block';
 
-    // Обновляем видимость кнопки "Наверх"
     updateToTopVisibility();
 
-    // Пагинация контролы
     if (totalPages > 1) {
       paginationEl.style.display = 'flex';
       pageInfoEl.textContent = `Страница ${page} из ${totalPages}`;
@@ -318,11 +307,9 @@
       paginationEl.style.display = 'none';
     }
 
-    // Восстанавливаем прокрутку внутри списка
     listEl.scrollTop = scrollPosition;
   }
 
-  // Обработчик для кнопки "Наверх"
   toTopBtn.addEventListener('click', () => {
     listEl.scrollTo({ top: 0, behavior: 'smooth' });
   });
@@ -330,17 +317,12 @@
   specEl.addEventListener('change', () => { currentPage = 1; render(); });
   searchEl.addEventListener('input', () => { currentPage = 1; render(); });
   prevBtn.addEventListener('click', () => { 
-    if (currentPage > 1) { 
-      currentPage--; 
-      render(currentPage); 
-    } 
+    if (currentPage > 1) { currentPage--; render(currentPage); } 
   });
   nextBtn.addEventListener('click', () => { 
-    currentPage++; 
-    render(currentPage); 
+    currentPage++; render(currentPage); 
   });
 
-  // Обновляем видимость кнопки "Наверх" при скролле
   listEl.addEventListener('scroll', () => {
     updateToTopVisibility();
   });
