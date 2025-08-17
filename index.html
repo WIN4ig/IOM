@@ -106,9 +106,9 @@
       box-sizing: border-box;
       width: 70%;
       height: 70%;
-      border: var(--stroke) solid currentColor;
+      border: var(--stroke) solid var(--text); /* Changed to white border */
       border-radius: 4px;
-      background: rgba(20, 26, 36, 0.9); /* Adjusted from white to match --card with slight transparency */
+      background: transparent; /* Removed fill */
     }
 
     .copy-btn::before {
@@ -213,7 +213,6 @@
       .item { flex-direction: column; align-items: stretch; }
       .year { margin-left: 0; margin-top: 6px; align-self: flex-end; }
       .copy-btn { --size: 18px; }
-      .copy-btn svg { width: 14px; height: 14px; }
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -229,7 +228,6 @@
       }
       .year { font-size: 12px; padding: 3px 6px; }
       .copy-btn { --size: 16px; }
-      .copy-btn svg { width: 12px; height: 12px; }
     }
   </style>
 </head>
@@ -330,7 +328,7 @@
   loaderEl.style.display = 'none';
 
   // Sort and format specialties from JSON: capitalize first letter, standardize separator to "-", sort alphabetically
-  specEl.innerHTML = `<option value="">Все специальности</option>` + raw.specialties
+  specEl.innerHTML = `<option value="">Все специальности</option>` + [...new Set(raw.specialties)] // Remove duplicates
     .sort((a, b) => a.localeCompare(b, 'ru-RU'))
     .map(s => {
       let formatted = s || '—';
