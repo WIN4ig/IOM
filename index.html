@@ -334,10 +334,10 @@
       return formatted;
     })
     .sort((a, b) => a.localeCompare(b, 'ru-RU'));
-  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase()}">${s}</option>`).join('');
+  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' ')}">${s}</option>`).join('');
   // Force re-render
   setTimeout(() => {
-    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase()}">${s}</option>`).join('');
+    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' ')}">${s}</option>`).join('');
     specEl.dispatchEvent(new Event('change'));
   }, 10);
 
@@ -362,7 +362,8 @@
     const spec = specEl.value;
     let items = raw.items;
     if (spec) {
-      items = items.filter(i => i.specialty && i.specialty.toLowerCase().includes(spec));
+      const normalizedSpec = spec.replace(/\s+/g, ' ').trim();
+      items = items.filter(i => i.specialty && i.specialty.toLowerCase().replace(/\s*-\s*/g, ' ').trim().includes(normalizedSpec));
     }
     if (q) {
       items = items.filter(i =>
