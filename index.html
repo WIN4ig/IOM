@@ -102,25 +102,27 @@
     .copy-btn::before {
       content: "";
       position: absolute;
-      top: 20%;
-      left: 20%;
-      width: 60%;
-      height: 70%;
+      top: 15%;
+      left: 15%;
+      width: 70%;
+      height: 75%;
       border: var(--stroke) solid var(--muted);
       border-top-left-radius: 2px;
       border-top-right-radius: 2px;
+      background: transparent;
     }
 
     .copy-btn::after {
       content: "";
       position: absolute;
-      top: 10%;
-      left: 30%;
-      width: 40%;
+      top: 5%;
+      left: 25%;
+      width: 50%;
       height: 10%;
       border: var(--stroke) solid var(--muted);
       border-bottom: none;
       border-radius: 2px;
+      background: transparent;
     }
 
     /* Ховер — светлее */
@@ -330,7 +332,7 @@
 
   // Sort and format specialties
   const uniqueSpecialties = [...new Set(raw.specialties.filter(s => s && typeof s === 'string'))];
-  specEl.innerHTML = `<option value="">Все специальности</option>` + uniqueSpecialties
+  const sortedOptions = uniqueSpecialties
     .sort((a, b) => a.localeCompare(b, 'ru-RU'))
     .map(s => {
       let formatted = s || '—';
@@ -339,11 +341,13 @@
         formatted = formatted.replace(/\s*-\s*/g, '-');
       }
       return `<option value="${s}">${formatted}</option>`;
-    }).join('');
-  // Force re-render to ensure sorting applies
+    });
+  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.join('');
+  // Force re-render with a brief delay
   setTimeout(() => {
+    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.join(''); // Reapply to ensure sorting
     specEl.dispatchEvent(new Event('change'));
-  }, 0);
+  }, 10);
 
   const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
   metaEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
