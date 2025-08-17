@@ -32,7 +32,7 @@
       min-height: calc(100dvh - 60px);
       padding: 0 16px 60px;
     }
-    h1 { font-size: 28px; margin: 0 0 16px; }
+    h1 { font-size: 28px; margin: revest 0 0 16px; }
     .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 12px; }
     .input, select { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; }
@@ -49,7 +49,7 @@
       min-height: 24px; /* Ensure consistent height */
     }
     .meta-text { flex: 1; }
-    .page-size-container { display: flex; align-items: center; gap: 5px; }
+    .results { font-size: 14px; color: var(--text); font-weight: bold; margin-bottom: 12px; display: none; }
     .list { 
       display: grid; 
       gap: 12px; 
@@ -227,6 +227,7 @@
       <div class="meta-text" id="meta-text"></div>
       <div class="page-size-container" id="page-size-container"></div>
     </div>
+    <div class="results" id="results"></div>
     <div id="error-message" class="error-message error" style="display: none;">
       Ошибка загрузки данных. Попробуйте обновить страницу позже.
     </div>
@@ -261,6 +262,7 @@
   const metaEl = document.getElementById('meta');
   const metaTextEl = document.getElementById('meta-text');
   const pageSizeContainer = document.getElementById('page-size-container');
+  const resultsEl = document.getElementById('results');
   const loaderEl = document.getElementById('loader');
   const paginationEl = document.getElementById('pagination');
   const prevBtn = document.getElementById('prev');
@@ -279,8 +281,10 @@
     const subEl = document.querySelector('.sub');
     const controlsEl = document.querySelector('.controls');
     const metaEl = document.querySelector('.meta');
+    const resultsEl = document.querySelector('.results');
     const errorMessageHeight = errorMessageEl.offsetHeight > 0 ? errorMessageEl.getBoundingClientRect().height + parseFloat(getComputedStyle(errorMessageEl).marginBottom) : 0;
     const emptyMessageHeight = emptyMessageEl.offsetHeight > 0 ? emptyMessageEl.getBoundingClientRect().height + parseFloat(getComputedStyle(emptyMessageEl).marginBottom) : 0;
+    const resultsHeight = resultsEl.offsetHeight > 0 ? resultsEl.getBoundingClientRect().height + parseFloat(getComputedStyle(resultsEl).marginBottom) : 0;
 
     const headerHeight = headerEl.getBoundingClientRect().height + parseFloat(getComputedStyle(headerEl).marginBottom);
     const subHeight = subEl.getBoundingClientRect().height + parseFloat(getComputedStyle(subEl).marginBottom);
@@ -288,7 +292,7 @@
     const metaHeight = metaEl.getBoundingClientRect().height + parseFloat(getComputedStyle(metaEl).marginTop) + parseFloat(getComputedStyle(metaEl).marginBottom);
     const paginationHeight = paginationEl.offsetHeight > 0 ? paginationEl.getBoundingClientRect().height : 0;
 
-    const totalHeightAbove = headerHeight + subHeight + controlsHeight + metaHeight + errorMessageHeight + emptyMessageHeight + paginationHeight;
+    const totalHeightAbove = headerHeight + subHeight + controlsHeight + metaHeight + resultsHeight + errorMessageHeight + emptyMessageHeight + paginationHeight;
 
     listEl.style.maxHeight = `calc(100dvh - ${totalHeightAbove}px)`;
   }
@@ -303,6 +307,8 @@
   } catch (e) {
     listEl.innerHTML = '';
     errorMessageEl.style.display = 'block';
+    metaTextEl.innerHTML = '0 записей • обновлено: — • источник Минздрав';
+    pageSizeContainer.innerHTML = '';
     console.error('Fetch error:', e);
     loaderEl.style.display = 'none';
     toTopBtn.style.display = 'none';
@@ -364,6 +370,10 @@
         (i.specialty && i.specialty.toLowerCase().includes(q))
       );
     }
+
+    // Update results display
+    resultsEl.style.display = (q || spec) ? 'block' : 'none';
+    resultsEl.textContent = `Найдено: ${items.length} ИОМ`;
 
     const existingSelect = pageSizeContainer.querySelector('#page-size-select');
     if (items.length > 1 && !existingSelect) {
