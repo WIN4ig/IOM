@@ -293,6 +293,7 @@
     console.error('Fetch error:', e);
     loaderEl.style.display = 'none';
     toTopBtn.style.display = 'none';
+    paginationEl.style.display = 'none'; // Скрываем навигацию при ошибке загрузки
     return;
   }
 
@@ -433,9 +434,10 @@
     errorMessageEl.style.display = 'none';
     emptyMessageEl.style.display = items.length ? 'none' : 'block';
 
-    updateToTopVisibility();
-
-    if (totalPages > 1) {
+    // Скрываем навигацию, если есть ошибка или пустой список
+    if (errorMessageEl.style.display === 'block' || emptyMessageEl.style.display === 'block') {
+      paginationEl.style.display = 'none';
+    } else if (totalPages > 1) {
       paginationEl.style.display = 'flex';
       pageInfoEl.textContent = `Страница ${page} из ${totalPages}`;
       prevBtn.disabled = page === 1;
@@ -443,6 +445,8 @@
     } else {
       paginationEl.style.display = 'none';
     }
+
+    updateToTopVisibility();
 
     listEl.scrollTop = 0;
 
