@@ -72,6 +72,9 @@
       font-size: 16px; 
       flex: 1; 
       min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
     .pos { color: var(--muted); font-size: 14px; margin-top: 6px; }
     .year { 
@@ -82,6 +85,23 @@
       border-radius: 8px; 
       margin-left: 10px; 
       white-space: nowrap; 
+    }
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 2px;
+      display: inline-flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+    .copy-btn:hover {
+      color: var(--accent);
+    }
+    .copy-btn svg {
+      width: 16px;
+      height: 16px;
     }
     .error-message {
       margin: 12px 0;
@@ -157,6 +177,7 @@
       }
       .item { flex-direction: column; align-items: stretch; }
       .year { margin-left: 0; margin-top: 6px; align-self: flex-end; }
+      .copy-btn svg { width: 14px; height: 14px; }
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -171,6 +192,7 @@
         padding: 5px 7px;
       }
       .year { font-size: 12px; padding: 3px 6px; }
+      .copy-btn svg { width: 12px; height: 12px; }
     }
   </style>
 </head>
@@ -270,15 +292,17 @@
 
   loaderEl.style.display = 'none';
 
-  // Format specialties for dropdown: capitalize first letter and standardize separator to "-"
-  specEl.innerHTML = `<option value="">Все специальности</option>` + raw.specialties.map(s => {
-    let formatted = s || '—';
-    if (s) {
-      formatted = s.charAt(0).toUpperCase() + s.slice(1);
-      formatted = formatted.replace(/\s*-\s*/g, '-');
-    }
-    return `<option value="${s}">${formatted}</option>`;
-  }).join('');
+  // Sort and format specialties for dropdown: capitalize first letter, standardize separator to "-", sort alphabetically
+  specEl.innerHTML = `<option value="">Все специальности</option>` + raw.specialties
+    .sort((a, b) => a.localeCompare(b, 'ru-RU'))
+    .map(s => {
+      let formatted = s || '—';
+      if (s) {
+        formatted = s.charAt(0).toUpperCase() + s.slice(1);
+        formatted = formatted.replace(/\s*-\s*/g, '-');
+      }
+      return `<option value="${s}">${formatted}</option>`;
+    }).join('');
 
   const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
   metaEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
@@ -348,6 +372,8 @@
           iomTitle = match[1].trim();
           year = match[2];
         }
+        // Remove "(по утвержденным клиническим рекомендациям)" from display
+        iomTitle = iomTitle.replace(/\(по утвержденным клиническим рекомендациям\)/i, '').trim();
       }
       // Format specialty: capitalize first letter and standardize separator to "-"
       let specialtyDisplay = i.specialty || '—';
@@ -358,13 +384,30 @@
       return `
         <div class="item" data-index="${index}">
           <div>
-            <div class="iom">${iomTitle}</div>
+            <div class="iom">
+              ${iomTitle}
+              <button class="copy-btn" data-iom="${i.iom}" title="Скопировать название ИОМ">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M8 4v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2h-8zM4 6h2v12a2 2 0 01-2 2H2v-2h2V6z"/>
+                </svg>
+              </button>
+            </div>
             <div class="pos"><span style="opacity:.6">Специальность:</span> ${specialtyDisplay}</div>
           </div>
           ${year ? `<div class="year">${year}</div>` : ''}
         </div>
       `;
     }).join('');
+
+    // Add event listeners for copy buttons
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const iomText = btn.getAttribute('data-iom');
+        navigator.clipboard.writeText(iomText).catch(err => {
+          console.error('Ошибка копирования:', err);
+        });
+      });
+    });
 
     errorMessageEl.style.display = 'none';
     emptyMessageEl.style.display = items.length ? 'none' : 'block';
