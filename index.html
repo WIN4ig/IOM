@@ -74,7 +74,7 @@
       min-width: 0;
       display: inline-flex; 
       align-items: center;
-      gap: 4px;
+      gap: 6px;
     }
     .pos { color: var(--muted); font-size: 14px; margin-top: 6px; }
     .year { 
@@ -310,30 +310,10 @@
       return formatted;
     })
     .sort((a, b) => a.localeCompare(b, 'ru-RU'));
-  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => {
-    // Используем оригинальное значение для value, а отображаем отформатированное
-    const original = uniqueSpecialties.find(orig => {
-      let formattedOrig = orig || '—';
-      if (orig) {
-        formattedOrig = orig.charAt(0).toUpperCase() + orig.slice(1).replace(/\s*-\s*/g, '-');
-      }
-      return formattedOrig === s;
-    }) || s;
-    return `<option value="${original.toLowerCase().replace('-', ' - ')}">${s}</option>`;
-  }).join('');
-
+  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' - ')}">${s}</option>`).join('');
   // Force re-render
   setTimeout(() => {
-    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => {
-      const original = uniqueSpecialties.find(orig => {
-        let formattedOrig = orig || '—';
-        if (orig) {
-          formattedOrig = orig.charAt(0).toUpperCase() + orig.slice(1).replace(/\s*-\s*/g, '-');
-        }
-        return formattedOrig === s;
-      }) || s;
-      return `<option value="${original.toLowerCase().replace('-', ' - ')}">${s}</option>`;
-    }).join('');
+    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' - ')}">${s}</option>`).join('');
     specEl.dispatchEvent(new Event('change'));
   }, 10);
 
@@ -357,11 +337,11 @@
     const spec = specEl.value;
     let items = raw.items;
     if (spec) {
-      // Нормализуем значение specialty для сравнения
+      // Нормализуем spec для сравнения
+      const normalizedSpec = spec.toLowerCase().replace(/\s*-\s*/g, '-');
       items = items.filter(i => {
-        if (!i.specialty) return false;
-        let normalizedSpec = i.specialty.toLowerCase().replace(/\s*-\s*/g, ' - ');
-        return normalizedSpec === spec;
+        const normalizedItemSpec = i.specialty ? i.specialty.toLowerCase().replace(/\s*-\s*/g, '-') : '';
+        return normalizedItemSpec === normalizedSpec;
       });
     }
     if (q) {
@@ -425,7 +405,7 @@
         <div class="item" data-index="${index}">
           <div>
             <div class="iom">
-              <span>${iomTitle}</span>
+              ${iomTitle}
               <button class="copy-btn" data-iom="${i.iom}" title="Скопировать название ИОМ">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="2">
                   <rect x="3" y="8" width="13" height="13" rx="4" stroke="currentColor"></rect>
