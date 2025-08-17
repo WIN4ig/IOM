@@ -72,9 +72,9 @@
       font-size: 16px; 
       flex: 1; 
       min-width: 0;
-      display: inline-flex; /* Возвращаем базовое поведение */
+      display: inline-flex; 
       align-items: center;
-      gap: 4px; /* Уменьшаем отступ для естественного вида */
+      gap: 4px;
     }
     .pos { color: var(--muted); font-size: 14px; margin-top: 6px; }
     .year { 
@@ -310,10 +310,30 @@
       return formatted;
     })
     .sort((a, b) => a.localeCompare(b, 'ru-RU'));
-  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' - ')}">${s}</option>`).join('');
+  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => {
+    // Используем оригинальное значение для value, а отображаем отформатированное
+    const original = uniqueSpecialties.find(orig => {
+      let formattedOrig = orig || '—';
+      if (orig) {
+        formattedOrig = orig.charAt(0).toUpperCase() + orig.slice(1).replace(/\s*-\s*/g, '-');
+      }
+      return formattedOrig === s;
+    }) || s;
+    return `<option value="${original.toLowerCase().replace('-', ' - ')}">${s}</option>`;
+  }).join('');
+
   // Force re-render
   setTimeout(() => {
-    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' - ')}">${s}</option>`).join('');
+    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => {
+      const original = uniqueSpecialties.find(orig => {
+        let formattedOrig = orig || '—';
+        if (orig) {
+          formattedOrig = orig.charAt(0).toUpperCase() + orig.slice(1).replace(/\s*-\s*/g, '-');
+        }
+        return formattedOrig === s;
+      }) || s;
+      return `<option value="${original.toLowerCase().replace('-', ' - ')}">${s}</option>`;
+    }).join('');
     specEl.dispatchEvent(new Event('change'));
   }, 10);
 
@@ -336,7 +356,14 @@
     const q = (searchEl.value || '').trim().toLowerCase();
     const spec = specEl.value;
     let items = raw.items;
-    if (spec) items = items.filter(i => i.specialty === spec);
+    if (spec) {
+      // Нормализуем значение specialty для сравнения
+      items = items.filter(i => {
+        if (!i.specialty) return false;
+        let normalizedSpec = i.specialty.toLowerCase().replace(/\s*-\s*/g, ' - ');
+        return normalizedSpec === spec;
+      });
+    }
     if (q) {
       items = items.filter(i =>
         (i.iom && i.iom.toLowerCase().includes(q)) ||
