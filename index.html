@@ -1,1 +1,464 @@
-Аденоматозный полипозный синдром (по утвержденным клиническим рекомендациям)-2022
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Рубрикатор ИОМ-КР / Должности</title>
+  <style>
+    :root { 
+      --bg: #0b0f16; 
+      --card: #141a24; 
+      --text: #e8eef6; 
+      --muted: #9fb0c3; 
+      --accent: #6aa9ff; 
+      --shadow: rgba(0,0,0,0.2); 
+      --border: #223048;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; height: 100%; }
+    body { 
+      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; 
+      background: var(--bg); 
+      color: var(--text); 
+      height: 100%; 
+      margin: 0;
+      overflow: hidden;
+    }
+    .wrap { 
+      max-width: 980px; 
+      margin: 0 auto; 
+      display: flex; 
+      flex-direction: column; 
+      min-height: calc(100dvh - 60px);
+      padding: 0 16px 60px;
+    }
+    h1 { font-size: 28px; margin: 0 0 16px; }
+    .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 12px; }
+    .input, select { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; }
+    .input:focus, select:focus { border-color: var(--accent); }
+    .meta { font-size: 13px; color: var(--muted); margin: 8px 0 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .results { font-size: 14px; color: var(--text); font-weight: bold; margin-bottom: 12px; display: none; }
+    .list { 
+      display: grid; 
+      gap: 12px; 
+      overflow-y: auto; 
+      scrollbar-width: thin; 
+      scrollbar-color: var(--muted) var(--card); 
+      flex: unset;
+      min-height: auto;
+    }
+    .list::-webkit-scrollbar { width: 8px; }
+    .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; }
+    .list::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 4px; }
+    .list::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    .item { 
+      background: var(--card); 
+      border: 1px solid var(--border); 
+      padding: 10px; 
+      border-radius: 14px; 
+      box-shadow: 0 2px 4px var(--shadow); 
+      transition: transform 0.2s, box-shadow 0.2s; 
+      height: auto; 
+      word-break: break-word; 
+      white-space: normal; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: flex-start; 
+    }
+    .item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); }
+    .iom { 
+      font-weight: 600; 
+      font-size: 16px; 
+      flex: 1; 
+      min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pos { color: var(--muted); font-size: 14px; margin-top: 6px; }
+    .year { 
+      font-size: 13px; 
+      color: var(--muted); 
+      background: var(--border); 
+      padding: 4px 8px; 
+      border-radius: 8px; 
+      margin-left: 10px; 
+      white-space: nowrap; 
+    }
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      width: 20px;
+      height: 20px;
+      transition: color 0.2s ease;
+    }
+    .copy-btn svg {
+      color: var(--muted); /* Начальный цвет */
+    }
+    .copy-btn:hover svg {
+      color: #b0c0d3; /* Чуть светлее при наведении */
+    }
+    .copy-btn:active {
+      animation: pop 0.25s ease;
+    }
+    @keyframes pop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+    .error-message {
+      margin: 12px 0;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      text-align: center;
+      box-shadow: 0 2px 4px var(--shadow);
+    }
+    .error-message.error { background: #ffe5e5; color: #a00; }
+    .error-message.empty { background: #fff3cd; color: #856404; }
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: #4a8dff; }
+    .loader { text-align: center; padding: 20px; color: var(--muted); }
+    .pagination { 
+      flex-shrink: 0; 
+      display: flex; 
+      justify-content: center; 
+      gap: 10px; 
+      padding: 10px; 
+      background: var(--bg); 
+      box-shadow: 0 -2px 4px var(--shadow); 
+      z-index: 10; 
+      position: fixed; 
+      bottom: 0; 
+      left: 0; 
+      width: 100%;
+    }
+    .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+    .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .page-btn:hover:not(:disabled) { background: #1e2740; }
+    .to-top { 
+      position: fixed; 
+      bottom: 90px; 
+      right: 20px; 
+      background: var(--card); 
+      border: 1px solid var(--border); 
+      color: var(--text); 
+      width: 40px; 
+      height: 40px; 
+      border-radius: 50%; 
+      cursor: pointer; 
+      display: none; 
+      z-index: 10; 
+      box-shadow: 0 2px 4px var(--shadow); 
+      transition: opacity 0.3s, transform 0.2s; 
+      align-items: center; 
+      justify-content: center; 
+    }
+    .to-top.visible { display: flex; opacity: 1; }
+    .to-top:hover { background: #1e2740; transform: scale(1.1); }
+    .page-size-container { display: flex; align-items: center; gap: 5px; }
+    .page-size-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .page-size-select { 
+      width: 90px; 
+      text-align: center; 
+      padding: 8px 10px;
+    }
+
+    @media (max-width: 720px) {
+      .controls { flex-direction: column; }
+      .input, select { width: 100%; }
+      h1 { font-size: 24px; }
+      .wrap { padding: 0 12px 60px; }
+      .pagination { padding: 8px; }
+      .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
+      .meta { flex-direction: column; align-items: flex-start; gap: 5px; }
+      .page-size-container { margin-top: 5px; justify-content: flex-end; }
+      .page-size-select { 
+        width: 80px; 
+        font-size: 13px; 
+        padding: 6px 8px; 
+      }
+      .item { flex-direction: column; align-items: stretch; }
+      .year { margin-left: 0; margin-top: 6px; align-self: flex-end; }
+      .copy-btn { width: 18px; height: 18px; }
+    }
+    @media (max-width: 480px) {
+      body { font-size: 14px; }
+      .item { padding: 10px; }
+      .iom { font-size: 15px; }
+      .pos { font-size: 13px; }
+      .pagination { gap: 8px; }
+      .page-btn { padding: 6px 12px; font-size: 14px; }
+      .page-size-select { 
+        width: 70px; 
+        font-size: 12px; 
+        padding: 5px 7px;
+      }
+      .year { font-size: 12px; padding: 3px 6px; }
+      .copy-btn { width: 16px; height: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Рубрикатор: ИОМ-КР / Должности</h1>
+    <div class="sub">Выберите врачебную специальность или воспользуйтесь поиском по специальности/ИОМ</div>
+
+    <div class="controls">
+      <input id="search" class="input" placeholder="Поиск по ИОМ/Должности…" />
+      <select id="spec"></select>
+    </div>
+
+    <div id="error-message" class="error-message error" style="display: none;">
+      Ошибка загрузки данных. Попробуйте обновить страницу позже.
+    </div>
+    <div id="empty-message" class="error-message empty" style="display: none;">
+      Ничего не найдено. Измените фильтры или поиск.
+    </div>
+
+    <div class="meta" id="meta"></div>
+    <div class="results" id="results"></div>
+    <div id="list" class="list"></div>
+    <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
+  </div>
+
+  <div class="pagination" id="pagination">
+    <button class="page-btn" id="prev" aria-label="Предыдущая страница">Назад</button>
+    <span id="page-info">Страница 1 из 44</span>
+    <button class="page-btn" id="next" aria-label="Следующая страница">Далее</button>
+  </div>
+
+  <button class="to-top" id="to-top" aria-label="Вернуться наверх">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 19V5M5 12l7-7 7 7"/>
+    </svg>
+  </button>
+
+<script>
+(async function(){
+  const dataUrl = 'data/matrix.json?v=' + Date.now(); 
+  const specEl = document.getElementById('spec');
+  const listEl = document.getElementById('list');
+  const errorMessageEl = document.getElementById('error-message');
+  const emptyMessageEl = document.getElementById('empty-message');
+  const searchEl = document.getElementById('search');
+  const metaEl = document.getElementById('meta');
+  const resultsEl = document.getElementById('results');
+  const loaderEl = document.getElementById('loader');
+  const paginationEl = document.getElementById('pagination');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const pageInfoEl = document.getElementById('page-info');
+  const toTopBtn = document.getElementById('to-top');
+
+  let raw = { items: [], specialties: [], updated_at: null };
+  let currentPage = 1;
+  let pageSize = 50;
+  let isDataLoaded = false;
+
+  // Function to calculate and set list max-height
+  function updateListMaxHeight() {
+    const headerEl = document.querySelector('h1');
+    const subEl = document.querySelector('.sub');
+    const controlsEl = document.querySelector('.controls');
+    const metaEl = document.querySelector('.meta');
+    const resultsEl = document.querySelector('.results');
+    const paginationEl = document.querySelector('.pagination');
+
+    const headerHeight = headerEl.getBoundingClientRect().height + parseFloat(getComputedStyle(headerEl).marginBottom);
+    const subHeight = subEl.getBoundingClientRect().height + parseFloat(getComputedStyle(subEl).marginBottom);
+    const controlsHeight = controlsEl.getBoundingClientRect().height + parseFloat(getComputedStyle(controlsEl).marginTop) + parseFloat(getComputedStyle(controlsEl).marginBottom);
+    const metaHeight = metaEl.getBoundingClientRect().height + parseFloat(getComputedStyle(metaEl).marginTop) + parseFloat(getComputedStyle(metaEl).marginBottom);
+    const resultsHeight = resultsEl.offsetHeight > 0 ? resultsEl.getBoundingClientRect().height + parseFloat(getComputedStyle(resultsEl).marginBottom) : 0;
+    const paginationHeight = paginationEl.offsetHeight > 0 ? paginationEl.getBoundingClientRect().height : 0;
+
+    const totalHeightAbove = headerHeight + subHeight + controlsHeight + metaHeight + resultsHeight + paginationHeight;
+
+    listEl.style.maxHeight = `calc(100dvh - ${totalHeightAbove}px)`;
+  }
+
+  loaderEl.style.display = 'block';
+
+  try {
+    const res = await fetch(dataUrl);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    raw = await res.json();
+    isDataLoaded = true;
+  } catch (e) {
+    listEl.innerHTML = '';
+    errorMessageEl.style.display = 'block';
+    console.error('Fetch error:', e);
+    loaderEl.style.display = 'none';
+    toTopBtn.style.display = 'none';
+    return;
+  }
+
+  loaderEl.style.display = 'none';
+
+  // Sort and format specialties
+  const uniqueSpecialties = [...new Set(raw.specialties.filter(s => s && typeof s === 'string'))];
+  const sortedOptions = uniqueSpecialties
+    .map(s => {
+      let formatted = s || '—';
+      if (s) {
+        formatted = s.charAt(0).toUpperCase() + s.slice(1);
+        formatted = formatted.replace(/\s*-\s*/g, '-');
+      }
+      return formatted;
+    })
+    .sort((a, b) => a.localeCompare(b, 'ru-RU'));
+  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' - ')}">${s}</option>`).join('');
+  // Force re-render
+  setTimeout(() => {
+    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' - ')}">${s}</option>`).join('');
+    specEl.dispatchEvent(new Event('change'));
+  }, 10);
+
+  const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
+  metaEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
+
+  function updateToTopVisibility() {
+    if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
+      const hasScroll = listEl.scrollHeight > listEl.clientHeight;
+      const isScrolled = listEl.scrollTop > 0;
+      toTopBtn.style.display = hasScroll && isScrolled ? 'flex' : 'none';
+      toTopBtn.classList.toggle('visible', hasScroll && isScrolled);
+    } else {
+      toTopBtn.style.display = 'none';
+      toTopBtn.classList.remove('visible');
+    }
+  }
+
+  function render(page = 1) {
+    const q = (searchEl.value || '').trim().toLowerCase();
+    const spec = specEl.value;
+    let items = raw.items;
+    if (spec) items = items.filter(i => i.specialty === spec);
+    if (q) {
+      items = items.filter(i =>
+        (i.iom && i.iom.toLowerCase().includes(q)) ||
+        (i.specialty && i.specialty.toLowerCase().includes(q))
+      );
+    }
+
+    if (q || spec) {
+      resultsEl.style.display = 'block';
+      resultsEl.textContent = `Найдено: ${items.length} ИОМ`;
+    } else {
+      resultsEl.style.display = 'none';
+    }
+
+    const pageSizeContainer = document.createElement('div');
+    pageSizeContainer.className = 'page-size-container';
+    const existingSelect = metaEl.querySelector('#page-size-select');
+    if (items.length > 1 && !existingSelect) {
+      pageSizeContainer.innerHTML = `ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option><option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option><option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option><option value="100" ${pageSize === 100 ? 'selected' : ''}>100</option></select>`;
+      metaEl.appendChild(pageSizeContainer);
+      const pageSizeSelect = document.getElementById('page-size-select');
+      pageSizeSelect.addEventListener('change', () => {
+        let newSize = parseInt(pageSizeSelect.value, 10);
+        if (isNaN(newSize) || newSize < 1) newSize = 50;
+        pageSize = newSize;
+        currentPage = 1;
+        render();
+        updateListMaxHeight();
+      });
+    } else if (items.length <= 1 && existingSelect) {
+      existingSelect.parentElement.remove();
+    }
+
+    const totalPages = Math.ceil(items.length / pageSize);
+    const start = (page - 1) * pageSize;
+    const paginatedItems = items.slice(start, start + pageSize);
+
+    listEl.innerHTML = paginatedItems.map((i, index) => {
+      // Parse i.iom to extract title and year
+      let iomTitle = i.iom || '—';
+      let year = '';
+      if (i.iom) {
+        // Match "Text - Year", "Text-Year", or "Text Year" where Year is a 4-digit number
+        const match = i.iom.match(/^(.*?)(?:(?:\s*-\s*|-)|\s)(\d{4})$/);
+        if (match) {
+          iomTitle = match[1].trim();
+          year = match[2];
+        }
+        // Remove "(по утвержденным клиническим рекомендациям)" from display
+        iomTitle = iomTitle.replace(/\(по утвержденным клиническим рекомендациям\)/i, '').trim();
+      }
+      // Format specialty: capitalize first letter and standardize separator to "-"
+      let specialtyDisplay = i.specialty || '—';
+      if (i.specialty) {
+        specialtyDisplay = i.specialty.charAt(0).toUpperCase() + i.specialty.slice(1);
+        specialtyDisplay = specialtyDisplay.replace(/\s*-\s*/g, '-');
+      }
+      return `
+        <div class="item" data-index="${index}">
+          <div>
+            <div class="iom">
+              ${iomTitle}
+              <button class="copy-btn" data-iom="${i.iom}" title="Скопировать название ИОМ">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="2">
+                  <rect x="3" y="8" width="13" height="13" rx="4" stroke="currentColor"></rect>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M13 2.00004L12.8842 2.00002C12.0666 1.99982 11.5094 1.99968 11.0246 2.09611C9.92585 2.31466 8.95982 2.88816 8.25008 3.69274C7.90896 4.07944 7.62676 4.51983 7.41722 5.00004H9.76392C10.189 4.52493 10.7628 4.18736 11.4147 4.05768C11.6802 4.00488 12.0228 4.00004 13 4.00004H14.6C15.7366 4.00004 16.5289 4.00081 17.1458 4.05121C17.7509 4.10066 18.0986 4.19283 18.362 4.32702C18.9265 4.61464 19.3854 5.07358 19.673 5.63807C19.8072 5.90142 19.8994 6.24911 19.9488 6.85428C19.9992 7.47112 20 8.26343 20 9.40004V11C20 11.9773 19.9952 12.3199 19.9424 12.5853C19.8127 13.2373 19.4748 13.8114 19 14.2361V16.5829C20.4795 15.9374 21.5804 14.602 21.9039 12.9755C22.0004 12.4907 22.0002 11.9334 22 11.1158L22 11V9.40004V9.35725C22 8.27346 22 7.3993 21.9422 6.69141C21.8826 5.96256 21.7568 5.32238 21.455 4.73008C20.9757 3.78927 20.2108 3.02437 19.27 2.545C18.6777 2.24322 18.0375 2.1174 17.3086 2.05785C16.6007 2.00002 15.7266 2.00003 14.6428 2.00004L14.6 2.00004H13Z" fill="currentColor"></path>
+                </svg>
+              </button>
+            </div>
+            <div class="pos"><span style="opacity:.6">Специальность:</span> ${specialtyDisplay}</div>
+          </div>
+          ${year ? `<div class="year">${year}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    // Add event listeners for copy buttons
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const iomText = btn.getAttribute('data-iom');
+        navigator.clipboard.writeText(iomText).catch(err => {
+          console.error('Ошибка копирования:', err);
+        });
+      });
+    });
+
+    errorMessageEl.style.display = 'none';
+    emptyMessageEl.style.display = items.length ? 'none' : 'block';
+
+    updateToTopVisibility();
+
+    if (totalPages > 1) {
+      paginationEl.style.display = 'flex';
+      pageInfoEl.textContent = `Страница ${page} из ${totalPages}`;
+      prevBtn.disabled = page === 1;
+      nextBtn.disabled = page === totalPages;
+    } else {
+      paginationEl.style.display = 'none';
+    }
+
+    listEl.scrollTop = 0;
+
+    // Delay the max-height update to allow DOM reflow
+    setTimeout(updateListMaxHeight, 0);
+  }
+
+  toTopBtn.addEventListener('click', () => {
+    listEl.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  specEl.addEventListener('change', () => { currentPage = 1; render(); });
+  searchEl.addEventListener('input', () => { currentPage = 1; render(); });
+  prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; render(currentPage); } });
+  nextBtn.addEventListener('click', () => { currentPage++; render(currentPage); });
+
+  listEl.addEventListener('scroll', () => { updateToTopVisibility(); });
+
+  window.addEventListener('resize', updateListMaxHeight);
+
+  updateListMaxHeight();
+  render();
+})();
+</script>
+</body>
+</html>
