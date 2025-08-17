@@ -109,13 +109,6 @@
       50%  { transform: scale(0.9); }
       100% { transform: scale(1); }
     }
-    .unique-checkbox {
-      display: flex;
-      align-items: center;
-      gap: 12px; /* Увеличен отступ между чекбоксом и текстом */
-      font-size: 13px;
-      color: var(--muted);
-    }
     .error-message {
       margin: 12px 0;
       padding: 10px;
@@ -191,7 +184,6 @@
       .item { flex-direction: column; align-items: stretch; }
       .year { margin-left: 0; margin-top: 6px; align-self: flex-end; }
       .copy-btn { width: 18px; height: 18px; }
-      .unique-checkbox { font-size: 12px; }
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -207,7 +199,6 @@
       }
       .year { font-size: 12px; padding: 3px 6px; }
       .copy-btn { width: 16px; height: 16px; }
-      .unique-checkbox { font-size: 11px; }
     }
   </style>
 </head>
@@ -224,19 +215,11 @@
     <div id="error-message" class="error-message error" style="display: none;">
       Ошибка загрузки данных. Попробуйте обновить страницу позже.
     </div>
-
-    <div class="meta" id="meta">
-      <span id="records-count"></span>
-      <div id="unique-checkbox-container" class="unique-checkbox" style="display: none;">
-        <label for="unique-only">Только уникальные</label>
-        <input type="checkbox" id="unique-only">
-        <div class="page-size-container" id="page-size-container"></div>
-      </div>
-    </div>
     <div id="empty-message" class="error-message empty" style="display: none;">
       Ничего не найдено. Измените фильтры или поиск.
     </div>
 
+    <div class="meta" id="meta"></div>
     <div class="results" id="results"></div>
     <div id="list" class="list"></div>
     <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
@@ -263,8 +246,6 @@
   const emptyMessageEl = document.getElementById('empty-message');
   const searchEl = document.getElementById('search');
   const metaEl = document.getElementById('meta');
-  const recordsCountEl = document.getElementById('records-count');
-  const uniqueOnlyCheckbox = document.getElementById('unique-only');
   const resultsEl = document.getElementById('results');
   const loaderEl = document.getElementById('loader');
   const paginationEl = document.getElementById('pagination');
@@ -272,14 +253,11 @@
   const nextBtn = document.getElementById('next');
   const pageInfoEl = document.getElementById('page-info');
   const toTopBtn = document.getElementById('to-top');
-  const pageSizeContainer = document.getElementById('page-size-container');
-  const uniqueCheckboxContainer = document.getElementById('unique-checkbox-container');
 
   let raw = { items: [], specialties: [], updated_at: null };
   let currentPage = 1;
   let pageSize = 50;
   let isDataLoaded = false;
-  let uniqueOnly = false;
 
   // Function to calculate and set list max-height
   function updateListMaxHeight() {
@@ -309,8 +287,6 @@
     if (!res.ok) throw new Error('HTTP ' + res.status);
     raw = await res.json();
     isDataLoaded = true;
-    console.log('Loaded specialties:', raw.specialties);
-    console.log('Loaded items with specialties:', raw.items.map(i => ({ iom: i.iom, specialty: i.specialty })));
   } catch (e) {
     listEl.innerHTML = '';
     errorMessageEl.style.display = 'block';
@@ -318,7 +294,6 @@
     loaderEl.style.display = 'none';
     toTopBtn.style.display = 'none';
     paginationEl.style.display = 'none';
-    uniqueCheckboxContainer.style.display = 'none';
     return;
   }
 
@@ -336,16 +311,15 @@
       return formatted;
     })
     .sort((a, b) => a.localeCompare(b, 'ru-RU'));
-  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' ')}">${s}</option>`).join('');
+  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' - ')}">${s}</option>`).join('');
   // Force re-render
   setTimeout(() => {
-    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' ')}">${s}</option>`).join('');
+    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' - ')}">${s}</option>`).join('');
     specEl.dispatchEvent(new Event('change'));
   }, 10);
 
   const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
-  recordsCountEl.textContent = `${uniqueOnly ? [...new Set(raw.items.map(i => i.iom))].length : raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
-  uniqueCheckboxContainer.style.display = 'flex';
+  metaEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
 
   function updateToTopVisibility() {
     if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
@@ -364,9 +338,12 @@
     const spec = specEl.value;
     let items = raw.items;
     if (spec) {
-      const normalizedSpec = spec.replace(/\s+/g, ' ').trim().toLowerCase();
-      items = items.filter(i => i.specialty && i.specialty.toLowerCase().replace(/\s*-\s*/g, ' ').trim() === normalizedSpec);
-      console.log('Filtering for spec:', normalizedSpec, 'Found items:', items.length);
+      // Нормализуем spec для сравнения
+      const normalizedSpec = spec.toLowerCase().replace(/\s*-\s*/g, '-');
+      items = items.filter(i => {
+        const normalizedItemSpec = i.specialty ? i.specialty.toLowerCase().replace(/\s*-\s*/g, '-') : '';
+        return normalizedItemSpec === normalizedSpec;
+      });
     }
     if (q) {
       items = items.filter(i =>
@@ -375,21 +352,19 @@
       );
     }
 
-    if (uniqueOnly) {
-      const uniqueIoms = new Set(items.map(i => i.iom));
-      items = Array.from(uniqueIoms).map(iom => items.find(i => i.iom === iom));
-    }
-
     if (q || spec) {
       resultsEl.style.display = 'block';
       resultsEl.textContent = `Найдено: ${items.length} ИОМ`;
-    } else if (emptyMessageEl.style.display !== 'block') {
+    } else {
       resultsEl.style.display = 'none';
     }
 
-    const existingSelect = pageSizeContainer.querySelector('#page-size-select');
+    const pageSizeContainer = document.createElement('div');
+    pageSizeContainer.className = 'page-size-container';
+    const existingSelect = metaEl.querySelector('#page-size-select');
     if (items.length > 1 && !existingSelect) {
       pageSizeContainer.innerHTML = `ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option><option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option><option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option><option value="100" ${pageSize === 100 ? 'selected' : ''}>100</option></select>`;
+      metaEl.appendChild(pageSizeContainer);
       const pageSizeSelect = document.getElementById('page-size-select');
       pageSizeSelect.addEventListener('change', () => {
         let newSize = parseInt(pageSizeSelect.value, 10);
@@ -400,7 +375,7 @@
         updateListMaxHeight();
       });
     } else if (items.length <= 1 && existingSelect) {
-      pageSizeContainer.innerHTML = '';
+      existingSelect.parentElement.remove();
     }
 
     const totalPages = Math.ceil(items.length / pageSize);
@@ -408,17 +383,25 @@
     const paginatedItems = items.slice(start, start + pageSize);
 
     listEl.innerHTML = paginatedItems.map((i, index) => {
+      // Parse i.iom to extract title and year
       let iomTitle = i.iom || '—';
       let year = '';
       if (i.iom) {
+        // Match "Text - Year", "Text-Year", or "Text Year" where Year is a 4-digit number
         const match = i.iom.match(/^(.*?)(?:(?:\s*-\s*|-)|\s)(\d{4})$/);
         if (match) {
           iomTitle = match[1].trim();
           year = match[2];
         }
+        // Remove "(по утвержденным клиническим рекомендациям)" from display
         iomTitle = iomTitle.replace(/\(по утвержденным клиническим рекомендациям\)/i, '').trim();
       }
-      let specialtyDisplay = uniqueOnly ? '' : (i.specialty ? i.specialty.charAt(0).toUpperCase() + i.specialty.slice(1).replace(/\s*-\s*/g, '-') : '—');
+      // Format specialty: capitalize first letter and standardize separator to "-"
+      let specialtyDisplay = i.specialty || '—';
+      if (i.specialty) {
+        specialtyDisplay = i.specialty.charAt(0).toUpperCase() + i.specialty.slice(1);
+        specialtyDisplay = specialtyDisplay.replace(/\s*-\s*/g, '-');
+      }
       return `
         <div class="item" data-index="${index}">
           <div>
@@ -431,13 +414,14 @@
                 </svg>
               </button>
             </div>
-            ${specialtyDisplay ? `<div class="pos"><span style="opacity:.6">Специальность:</span> ${specialtyDisplay}</div>` : ''}
+            <div class="pos"><span style="opacity:.6">Специальность:</span> ${specialtyDisplay}</div>
           </div>
           ${year ? `<div class="year">${year}</div>` : ''}
         </div>
       `;
     }).join('');
 
+    // Add event listeners for copy buttons
     document.querySelectorAll('.copy-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const iomText = btn.getAttribute('data-iom');
@@ -449,22 +433,24 @@
 
     errorMessageEl.style.display = 'none';
     emptyMessageEl.style.display = items.length ? 'none' : 'block';
-    resultsEl.style.display = emptyMessageEl.style.display === 'block' ? 'none' : resultsEl.style.display;
 
+    // Скрываем навигацию, если есть ошибка или пустой список
     if (errorMessageEl.style.display === 'block' || emptyMessageEl.style.display === 'block') {
       paginationEl.style.display = 'none';
-      uniqueCheckboxContainer.style.display = 'none';
-    } else {
-      paginationEl.style.display = totalPages > 1 ? 'flex' : 'none';
-      uniqueCheckboxContainer.style.display = 'flex';
+    } else if (totalPages > 1) {
+      paginationEl.style.display = 'flex';
       pageInfoEl.textContent = `Страница ${page} из ${totalPages}`;
       prevBtn.disabled = page === 1;
       nextBtn.disabled = page === totalPages;
+    } else {
+      paginationEl.style.display = 'none';
     }
 
     updateToTopVisibility();
 
     listEl.scrollTop = 0;
+
+    // Delay the max-height update to allow DOM reflow
     setTimeout(updateListMaxHeight, 0);
   }
 
@@ -476,14 +462,9 @@
   searchEl.addEventListener('input', () => { currentPage = 1; render(); });
   prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; render(currentPage); } });
   nextBtn.addEventListener('click', () => { currentPage++; render(currentPage); });
-  uniqueOnlyCheckbox.addEventListener('change', () => {
-    uniqueOnly = uniqueOnlyCheckbox.checked;
-    recordsCountEl.textContent = `${uniqueOnly ? [...new Set(raw.items.map(i => i.iom))].length : raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
-    currentPage = 1;
-    render();
-  });
 
   listEl.addEventListener('scroll', () => { updateToTopVisibility(); });
+
   window.addEventListener('resize', updateListMaxHeight);
 
   updateListMaxHeight();
