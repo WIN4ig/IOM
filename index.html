@@ -362,7 +362,7 @@
     const spec = specEl.value;
     let items = raw.items;
     if (spec) {
-      items = items.filter(i => i.specialty && i.specialty.toLowerCase() === spec);
+      items = items.filter(i => i.specialty && i.specialty.toLowerCase().includes(spec));
     }
     if (q) {
       items = items.filter(i =>
