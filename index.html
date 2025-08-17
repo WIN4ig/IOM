@@ -355,7 +355,6 @@
     emptyMessageEl.style.display = items.length ? 'none' : 'block';
 
     updateToTopVisibility();
-    updateListMaxHeight();
 
     if (totalPages > 1) {
       paginationEl.style.display = 'flex';
@@ -367,6 +366,9 @@
     }
 
     listEl.scrollTop = 0;
+
+    // Delay the max-height update to allow DOM reflow
+    setTimeout(updateListMaxHeight, 0);
   }
 
   toTopBtn.addEventListener('click', () => {
