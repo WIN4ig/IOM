@@ -41,14 +41,18 @@
       font-size: 13px; 
       color: var(--muted); 
       margin: 8px 0 12px; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      flex-wrap: wrap; 
-      gap: 6px; 
-      height: 32px; /* Fixed height to prevent layout shift */
+      position: relative;
+      min-height: 24px; /* Reserve space for meta text */
     }
     .meta-text { flex: 1; }
+    .page-size-container { 
+      position: absolute; 
+      right: 0; 
+      top: 0; 
+      display: flex; 
+      align-items: center; 
+      gap: 5px; 
+    }
     .results { font-size: 14px; color: var(--text); font-weight: bold; margin-bottom: 12px; display: none; }
     .list { 
       display: grid; 
@@ -171,7 +175,6 @@
     }
     .to-top.visible { display: flex; opacity: 1; }
     .to-top:hover { background: #1e2740; transform: scale(1.1); }
-    .page-size-container { display: flex; align-items: center; gap: 5px; }
     .page-size-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
     .page-size-select { 
       width: 90px; 
@@ -186,8 +189,8 @@
       .wrap { padding: 0 12px 60px; }
       .pagination { padding: 8px; }
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
-      .meta { flex-direction: column; align-items: flex-start; gap: 5px; height: 48px; /* Adjusted for stacked layout */ }
-      .page-size-container { margin-top: 5px; justify-content: flex-end; }
+      .meta { min-height: 48px; /* Reserve space for stacked layout */ }
+      .page-size-container { top: 24px; right: 0; }
       .page-size-select { 
         width: 80px; 
         font-size: 13px; 
@@ -375,7 +378,7 @@
     }
 
     // Update results display
-    resultsEl.style.display = (q || spec) ? 'block' : 'none';
+    resultsEl.style.display = (q || spec) && items.length > 0 ? 'block' : 'none';
     resultsEl.textContent = `Найдено: ${items.length} ИОМ`;
 
     const existingSelect = pageSizeContainer.querySelector('#page-size-select');
