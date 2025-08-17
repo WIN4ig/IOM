@@ -71,7 +71,7 @@
       font-weight: 600; 
       font-size: 16px; 
       flex: 1; 
-      min-width: 0; /* Prevent flex shrinkage issues */
+      min-width: 0;
     }
     .pos { color: var(--muted); font-size: 14px; margin-top: 6px; }
     .year { 
@@ -333,8 +333,8 @@
       let iomTitle = i.iom || '—';
       let year = '';
       if (i.iom) {
-        // Match "Text - Year" or "Text-Year" where Year is a 4-digit number
-        const match = i.iom.match(/^(.*?)(?:\s*-\s*|-)(\d{4})$/);
+        // Match "Text - Year", "Text-Year", or "Text Year" where Year is a 4-digit number
+        const match = i.iom.match(/^(.*?)(?:(?:\s*-\s*|-)|\s)(\d{4})$/);
         if (match) {
           iomTitle = match[1].trim();
           year = match[2];
