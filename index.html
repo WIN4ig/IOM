@@ -67,7 +67,12 @@
       align-items: flex-start; 
     }
     .item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); }
-    .iom { font-weight: 600; font-size: 16px; flex: 1; }
+    .iom { 
+      font-weight: 600; 
+      font-size: 16px; 
+      flex: 1; 
+      min-width: 0; /* Prevent flex shrinkage issues */
+    }
     .pos { color: var(--muted); font-size: 14px; margin-top: 6px; }
     .year { 
       font-size: 13px; 
@@ -327,10 +332,13 @@
       // Parse i.iom to extract title and year
       let iomTitle = i.iom || '—';
       let year = '';
-      if (i.iom && i.iom.includes(' - ')) {
-        const parts = i.iom.split(' - ');
-        iomTitle = parts[0].trim();
-        year = parts[1].trim();
+      if (i.iom) {
+        // Match "Text - Year" or "Text-Year" where Year is a 4-digit number
+        const match = i.iom.match(/^(.*?)(?:\s*-\s*|-)(\d{4})$/);
+        if (match) {
+          iomTitle = match[1].trim();
+          year = match[2];
+        }
       }
       return `
         <div class="item" data-index="${index}">
