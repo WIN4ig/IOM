@@ -41,14 +41,14 @@
       font-size: 13px; 
       color: var(--muted); 
       margin: 8px 0 12px; 
-      position: relative;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      gap: 12px; 
       min-height: 24px; /* Reserve space for meta text */
     }
     .meta-text { flex: 1; }
     .page-size-container { 
-      position: absolute; 
-      right: 0; 
-      top: 0; 
       display: flex; 
       align-items: center; 
       gap: 5px; 
@@ -131,7 +131,7 @@
       font-size: 14px;
       text-align: center;
       box-shadow: 0 2px 4px var(--shadow);
-      display: none; /* Ensure initial state is hidden */
+      display: none;
     }
     .error-message.error { background: #ffe5e5; color: #a00; }
     .error-message.empty { background: #fff3cd; color: #856404; }
@@ -189,8 +189,13 @@
       .wrap { padding: 0 12px 60px; }
       .pagination { padding: 8px; }
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
-      .meta { min-height: 48px; /* Reserve space for stacked layout */ }
-      .page-size-container { top: 24px; right: 0; }
+      .meta { 
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 5px; 
+        min-height: 48px; 
+      }
+      .page-size-container { margin-top: 5px; }
       .page-size-select { 
         width: 80px; 
         font-size: 13px; 
@@ -279,6 +284,10 @@
   let pageSize = 50;
   let isDataLoaded = false;
 
+  // Initialize page size container
+  pageSizeContainer.innerHTML = `ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select>`;
+  pageSizeContainer.style.visibility = 'hidden';
+
   // Function to calculate and set list max-height
   function updateListMaxHeight() {
     const headerEl = document.querySelector('h1');
@@ -311,8 +320,8 @@
   } catch (e) {
     listEl.innerHTML = '';
     errorMessageEl.style.display = 'block';
-    metaTextEl.style.display = 'none'; // Hide meta text on error
-    pageSizeContainer.innerHTML = '';
+    metaTextEl.style.display = 'none';
+    pageSizeContainer.style.visibility = 'hidden';
     resultsEl.style.display = 'none';
     console.error('Fetch error:', e);
     loaderEl.style.display = 'none';
@@ -345,7 +354,7 @@
 
   const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
   metaTextEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
-  metaTextEl.style.display = 'block'; // Ensure meta text is visible after successful load
+  metaTextEl.style.display = 'block';
 
   function updateToTopVisibility() {
     if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
@@ -381,10 +390,12 @@
     resultsEl.style.display = (q || spec) && items.length > 0 ? 'block' : 'none';
     resultsEl.textContent = `Найдено: ${items.length} ИОМ`;
 
-    const existingSelect = pageSizeContainer.querySelector('#page-size-select');
-    if (items.length > 1 && !existingSelect) {
-      pageSizeContainer.innerHTML = `ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option><option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option><option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option><option value="100" ${pageSize === 100 ? 'selected' : ''}>100</option></select>`;
-      const pageSizeSelect = document.getElementById('page-size-select');
+    pageSizeContainer.style.visibility = items.length > 1 ? 'visible' : 'hidden';
+    const pageSizeSelect = document.getElementById('page-size-select');
+    if (pageSizeSelect && pageSizeSelect.value != pageSize) {
+      pageSizeSelect.value = pageSize;
+    }
+    if (pageSizeSelect && !pageSizeSelect._hasChangeListener) {
       pageSizeSelect.addEventListener('change', () => {
         let newSize = parseInt(pageSizeSelect.value, 10);
         if (isNaN(newSize) || newSize < 1) newSize = 50;
@@ -393,8 +404,7 @@
         render();
         updateListMaxHeight();
       });
-    } else if (items.length <= 1 && existingSelect) {
-      pageSizeContainer.innerHTML = '';
+      pageSizeSelect._hasChangeListener = true;
     }
 
     const totalPages = Math.ceil(items.length / pageSize);
