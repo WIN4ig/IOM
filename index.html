@@ -225,9 +225,9 @@
     <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
   </div>
 
-  <div class="pagination" id="pagination">
+  <div class="pagination" id="pagination" style="display: none;">
     <button class="page-btn" id="prev" aria-label="Предыдущая страница">Назад</button>
-    <span id="page-info">Страница 1 из 44</span>
+    <span id="page-info"></span>
     <button class="page-btn" id="next" aria-label="Следующая страница">Далее</button>
   </div>
 
@@ -293,7 +293,7 @@
     console.error('Fetch error:', e);
     loaderEl.style.display = 'none';
     toTopBtn.style.display = 'none';
-    paginationEl.style.display = 'none'; // Скрываем навигацию при ошибке загрузки
+    paginationEl.style.display = 'none';
     return;
   }
 
