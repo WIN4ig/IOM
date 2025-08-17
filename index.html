@@ -112,7 +112,7 @@
     .unique-checkbox {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 12px; /* Увеличен отступ между чекбоксом и текстом */
       font-size: 13px;
       color: var(--muted);
     }
@@ -334,10 +334,10 @@
       return formatted;
     })
     .sort((a, b) => a.localeCompare(b, 'ru-RU'));
-  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' - ')}">${s}</option>`).join('');
+  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase()}">${s}</option>`).join('');
   // Force re-render
   setTimeout(() => {
-    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' - ')}">${s}</option>`).join('');
+    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase()}">${s}</option>`).join('');
     specEl.dispatchEvent(new Event('change'));
   }, 10);
 
@@ -362,7 +362,7 @@
     const spec = specEl.value;
     let items = raw.items;
     if (spec) {
-      items = items.filter(i => i.specialty === spec);
+      items = items.filter(i => i.specialty && i.specialty.toLowerCase() === spec);
     }
     if (q) {
       items = items.filter(i =>
@@ -450,16 +450,13 @@
     if (errorMessageEl.style.display === 'block' || emptyMessageEl.style.display === 'block') {
       paginationEl.style.display = 'none';
       uniqueCheckboxContainer.style.display = 'none';
-    } else if (totalPages > 1) {
-      paginationEl.style.display = 'flex';
+    } else {
+      paginationEl.style.display = totalPages > 1 ? 'flex' : 'none';
+      uniqueCheckboxContainer.style.display = 'flex';
       pageInfoEl.textContent = `Страница ${page} из ${totalPages}`;
       prevBtn.disabled = page === 1;
       nextBtn.disabled = page === totalPages;
-    } else {
-      paginationEl.style.display = 'none';
     }
-
-    uniqueCheckboxContainer.style.display = errorMessageEl.style.display === 'block' ? 'none' : 'flex';
 
     updateToTopVisibility();
 
