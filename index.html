@@ -38,6 +38,7 @@
     .input, select { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; }
     .input:focus, select:focus { border-color: var(--accent); }
     .meta { font-size: 13px; color: var(--muted); margin: 8px 0 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .meta-text { flex: 1; }
     .list { 
       display: grid; 
       gap: 12px; 
@@ -95,10 +96,10 @@
       transition: color 0.2s ease;
     }
     .copy-btn svg {
-      color: var(--muted); /* Начальный цвет */
+      color: var(--muted);
     }
     .copy-btn:hover svg {
-      color: #b0c0d3; /* Чуть светлее при наведении */
+      color: #b0c0d3;
     }
     .copy-btn:active {
       animation: pop 0.25s ease;
@@ -211,7 +212,10 @@
       <select id="spec"></select>
     </div>
 
-    <div class="meta" id="meta"></div>
+    <div class="meta" id="meta">
+      <div class="meta-text" id="meta-text"></div>
+      <div class="page-size-container" id="page-size-container"></div>
+    </div>
     <div id="error-message" class="error-message error" style="display: none;">
       Ошибка загрузки данных. Попробуйте обновить страницу позже.
     </div>
@@ -244,6 +248,8 @@
   const emptyMessageEl = document.getElementById('empty-message');
   const searchEl = document.getElementById('search');
   const metaEl = document.getElementById('meta');
+  const metaTextEl = document.getElementById('meta-text');
+  const pageSizeContainer = document.getElementById('page-size-container');
   const loaderEl = document.getElementById('loader');
   const paginationEl = document.getElementById('pagination');
   const prevBtn = document.getElementById('prev');
@@ -315,7 +321,7 @@
   }, 10);
 
   const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
-  metaEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
+  metaTextEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
 
   function updateToTopVisibility() {
     if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
@@ -334,7 +340,6 @@
     const spec = specEl.value;
     let items = raw.items;
     if (spec) {
-      // Нормализуем spec для сравнения
       const normalizedSpec = spec.toLowerCase().replace(/\s*-\s*/g, '-');
       items = items.filter(i => {
         const normalizedItemSpec = i.specialty ? i.specialty.toLowerCase().replace(/\s*-\s*/g, '-') : '';
@@ -348,12 +353,9 @@
       );
     }
 
-    const pageSizeContainer = document.createElement('div');
-    pageSizeContainer.className = 'page-size-container';
-    const existingSelect = metaEl.querySelector('#page-size-select');
+    const existingSelect = pageSizeContainer.querySelector('#page-size-select');
     if (items.length > 1 && !existingSelect) {
       pageSizeContainer.innerHTML = `ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option><option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option><option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option><option value="100" ${pageSize === 100 ? 'selected' : ''}>100</option></select>`;
-      metaEl.appendChild(pageSizeContainer);
       const pageSizeSelect = document.getElementById('page-size-select');
       pageSizeSelect.addEventListener('change', () => {
         let newSize = parseInt(pageSizeSelect.value, 10);
@@ -364,7 +366,7 @@
         updateListMaxHeight();
       });
     } else if (items.length <= 1 && existingSelect) {
-      existingSelect.parentElement.remove();
+      pageSizeContainer.innerHTML = '';
     }
 
     const totalPages = Math.ceil(items.length / pageSize);
@@ -372,20 +374,16 @@
     const paginatedItems = items.slice(start, start + pageSize);
 
     listEl.innerHTML = paginatedItems.map((i, index) => {
-      // Parse i.iom to extract title and year
       let iomTitle = i.iom || '—';
       let year = '';
       if (i.iom) {
-        // Match "Text - Year", "Text-Year", or "Text Year" where Year is a 4-digit number
         const match = i.iom.match(/^(.*?)(?:(?:\s*-\s*|-)|\s)(\d{4})$/);
         if (match) {
           iomTitle = match[1].trim();
           year = match[2];
         }
-        // Remove "(по утвержденным клиническим рекомендациям)" from display
         iomTitle = iomTitle.replace(/\(по утвержденным клиническим рекомендациям\)/i, '').trim();
       }
-      // Format specialty: capitalize first letter and standardize separator to "-"
       let specialtyDisplay = i.specialty || '—';
       if (i.specialty) {
         specialtyDisplay = i.specialty.charAt(0).toUpperCase() + i.specialty.slice(1);
@@ -423,7 +421,6 @@
     errorMessageEl.style.display = 'none';
     emptyMessageEl.style.display = items.length ? 'none' : 'block';
 
-    // Скрываем навигацию, если есть ошибка или пустой список
     if (errorMessageEl.style.display === 'block' || emptyMessageEl.style.display === 'block') {
       paginationEl.style.display = 'none';
     } else if (totalPages > 1) {
@@ -439,7 +436,6 @@
 
     listEl.scrollTop = 0;
 
-    // Delay the max-height update to allow DOM reflow
     setTimeout(updateListMaxHeight, 0);
   }
 
