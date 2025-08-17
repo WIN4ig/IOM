@@ -227,6 +227,13 @@
 
     <div class="meta" id="meta">
       <span id="records-count"></span>
+      <div id="unique-checkbox-container" class="unique-checkbox" style="display: none;">
+        <label>
+          <input type="checkbox" id="unique-only">
+          Только уникальные
+        </label>
+        <div class="page-size-container" id="page-size-container"></div>
+      </div>
     </div>
     <div id="empty-message" class="error-message empty" style="display: none;">
       Ничего не найдено. Измените фильтры или поиск.
@@ -235,13 +242,6 @@
     <div class="results" id="results"></div>
     <div id="list" class="list"></div>
     <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
-    <div id="unique-checkbox-container" class="unique-checkbox" style="display: none;">
-      <label>
-        <input type="checkbox" id="unique-only">
-        Только уникальные
-      </label>
-      <div class="page-size-container" id="page-size-container"></div>
-    </div>
   </div>
 
   <div class="pagination" id="pagination" style="display: none;">
@@ -291,7 +291,6 @@
     const metaEl = document.querySelector('.meta');
     const resultsEl = document.querySelector('.results');
     const paginationEl = document.querySelector('.pagination');
-    const uniqueCheckboxContainerEl = document.querySelector('#unique-checkbox-container');
 
     const headerHeight = headerEl.getBoundingClientRect().height + parseFloat(getComputedStyle(headerEl).marginBottom);
     const subHeight = subEl.getBoundingClientRect().height + parseFloat(getComputedStyle(subEl).marginBottom);
@@ -299,9 +298,8 @@
     const metaHeight = metaEl.getBoundingClientRect().height + parseFloat(getComputedStyle(metaEl).marginTop) + parseFloat(getComputedStyle(metaEl).marginBottom);
     const resultsHeight = resultsEl.offsetHeight > 0 ? resultsEl.getBoundingClientRect().height + parseFloat(getComputedStyle(resultsEl).marginBottom) : 0;
     const paginationHeight = paginationEl.offsetHeight > 0 ? paginationEl.getBoundingClientRect().height : 0;
-    const uniqueCheckboxHeight = uniqueCheckboxContainerEl.offsetHeight > 0 ? uniqueCheckboxContainerEl.getBoundingClientRect().height : 0;
 
-    const totalHeightAbove = headerHeight + subHeight + controlsHeight + metaHeight + resultsHeight + paginationHeight + uniqueCheckboxHeight;
+    const totalHeightAbove = headerHeight + subHeight + controlsHeight + metaHeight + resultsHeight + paginationHeight;
 
     listEl.style.maxHeight = `calc(100dvh - ${totalHeightAbove}px)`;
   }
