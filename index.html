@@ -99,31 +99,28 @@
       transition: color 0.2s ease;
     }
 
-    .copy-btn::before,
+    .copy-btn::before {
+      content: "";
+      position: absolute;
+      top: 20%;
+      left: 20%;
+      width: 60%;
+      height: 70%;
+      border: var(--stroke) solid var(--muted);
+      border-top-left-radius: 2px;
+      border-top-right-radius: 2px;
+    }
+
     .copy-btn::after {
       content: "";
       position: absolute;
-      box-sizing: border-box;
-      border: var(--stroke) solid var(--muted); /* Subtle border matching --muted */
-      background: transparent;
-    }
-
-    .copy-btn::before {
-      top: 25%;
-      left: 25%;
-      width: 50%;
-      height: 50%;
-      border-right: none;
+      top: 10%;
+      left: 30%;
+      width: 40%;
+      height: 10%;
+      border: var(--stroke) solid var(--muted);
       border-bottom: none;
-    }
-
-    .copy-btn::after {
-      bottom: 25%;
-      right: 25%;
-      width: 50%;
-      height: 50%;
-      border-left: none;
-      border-top: none;
+      border-radius: 2px;
     }
 
     /* Ховер — светлее */
@@ -331,10 +328,8 @@
 
   loaderEl.style.display = 'none';
 
-  // Debug and sort specialties
-  console.log('Raw specialties before sorting:', raw.specialties);
-  const uniqueSpecialties = [...new Set(raw.specialties.filter(s => s && typeof s === 'string'))]; // Filter out invalid entries
-  console.log('Unique specialties after filtering:', uniqueSpecialties);
+  // Sort and format specialties
+  const uniqueSpecialties = [...new Set(raw.specialties.filter(s => s && typeof s === 'string'))];
   specEl.innerHTML = `<option value="">Все специальности</option>` + uniqueSpecialties
     .sort((a, b) => a.localeCompare(b, 'ru-RU'))
     .map(s => {
@@ -345,7 +340,10 @@
       }
       return `<option value="${s}">${formatted}</option>`;
     }).join('');
-  console.log('Sorted and formatted specialties:', specEl.innerHTML);
+  // Force re-render to ensure sorting applies
+  setTimeout(() => {
+    specEl.dispatchEvent(new Event('change'));
+  }, 0);
 
   const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
   metaEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
