@@ -291,6 +291,7 @@
     const metaEl = document.querySelector('.meta');
     const resultsEl = document.querySelector('.results');
     const paginationEl = document.querySelector('.pagination');
+    const uniqueCheckboxContainerEl = document.querySelector('#unique-checkbox-container');
 
     const headerHeight = headerEl.getBoundingClientRect().height + parseFloat(getComputedStyle(headerEl).marginBottom);
     const subHeight = subEl.getBoundingClientRect().height + parseFloat(getComputedStyle(subEl).marginBottom);
@@ -298,8 +299,9 @@
     const metaHeight = metaEl.getBoundingClientRect().height + parseFloat(getComputedStyle(metaEl).marginTop) + parseFloat(getComputedStyle(metaEl).marginBottom);
     const resultsHeight = resultsEl.offsetHeight > 0 ? resultsEl.getBoundingClientRect().height + parseFloat(getComputedStyle(resultsEl).marginBottom) : 0;
     const paginationHeight = paginationEl.offsetHeight > 0 ? paginationEl.getBoundingClientRect().height : 0;
+    const uniqueCheckboxHeight = uniqueCheckboxContainerEl.offsetHeight > 0 ? uniqueCheckboxContainerEl.getBoundingClientRect().height : 0;
 
-    const totalHeightAbove = headerHeight + subHeight + controlsHeight + metaHeight + resultsHeight + paginationHeight;
+    const totalHeightAbove = headerHeight + subHeight + controlsHeight + metaHeight + resultsHeight + paginationHeight + uniqueCheckboxHeight;
 
     listEl.style.maxHeight = `calc(100dvh - ${totalHeightAbove}px)`;
   }
