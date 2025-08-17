@@ -270,7 +270,16 @@
 
   loaderEl.style.display = 'none';
 
-  specEl.innerHTML = `<option value="">Все специальности</option>` + raw.specialties.map(s => `<option>${s}</option>`).join('');
+  // Format specialties for dropdown: capitalize first letter and standardize separator to "-"
+  specEl.innerHTML = `<option value="">Все специальности</option>` + raw.specialties.map(s => {
+    let formatted = s || '—';
+    if (s) {
+      formatted = s.charAt(0).toUpperCase() + s.slice(1);
+      formatted = formatted.replace(/\s*-\s*/g, '-');
+    }
+    return `<option value="${s}">${formatted}</option>`;
+  }).join('');
+
   const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
   metaEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
 
@@ -340,13 +349,11 @@
           year = match[2];
         }
       }
-      // Format specialty: capitalize first letter and standardize separators
+      // Format specialty: capitalize first letter and standardize separator to "-"
       let specialtyDisplay = i.specialty || '—';
       if (i.specialty) {
-        // Capitalize first letter
         specialtyDisplay = i.specialty.charAt(0).toUpperCase() + i.specialty.slice(1);
-        // Replace "-" or " - " with " - "
-        specialtyDisplay = specialtyDisplay.replace(/\s*-\s*/g, ' - ');
+        specialtyDisplay = specialtyDisplay.replace(/\s*-\s*/g, '-');
       }
       return `
         <div class="item" data-index="${index}">
