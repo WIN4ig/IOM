@@ -13,7 +13,7 @@
       --accent: #6aa9ff; 
       --shadow: rgba(0,0,0,0.2); 
       --border: #223048;
-      --white-border: #ffffff; /* Добавлен белый цвет для периметра */
+      --white-border: #ffffff; /* Белый цвет для периметра */
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; height: 100%; }
@@ -95,6 +95,7 @@
       display: inline-block;
       width: var(--size);
       height: var(--size);
+      background: transparent; /* Явно задаём прозрачный фон */
       color: var(--white-border); /* Белый периметр */
       cursor: pointer;
       transition: color 0.2s ease;
@@ -103,35 +104,21 @@
     .copy-btn::before {
       content: "";
       position: absolute;
-      top: 15%;
-      left: 15%;
-      width: 70%;
-      height: 75%;
+      top: 20%;
+      left: 20%;
+      width: 60%;
+      height: 70%;
       border: var(--stroke) solid var(--white-border); /* Белый периметр */
       border-top-left-radius: 2px;
       border-top-right-radius: 2px;
       background: transparent; /* Прозрачная заливка */
     }
 
-    .copy-btn::after {
-      content: "";
-      position: absolute;
-      top: 5%;
-      left: 25%;
-      width: 50%;
-      height: 10%;
-      border: var(--stroke) solid var(--white-border); /* Белый периметр */
-      border-bottom: none;
-      border-radius: 2px;
-      background: transparent; /* Прозрачная заливка */
-    }
-
-    /* Ховер — светлее белого */
+    /* Убрал ::after для упрощения */
     .copy-btn:hover {
       color: #f0f0f0; /* Чуть светлее белого для ховера */
     }
 
-    /* Клик-анимация */
     .copy-btn:active {
       animation: pop 0.25s ease;
     }
