@@ -228,10 +228,8 @@
     <div class="meta" id="meta">
       <span id="records-count"></span>
       <div id="unique-checkbox-container" class="unique-checkbox" style="display: none;">
-        <label>
-          <input type="checkbox" id="unique-only">
-          Только уникальные
-        </label>
+        <label for="unique-only">Только уникальные</label>
+        <input type="checkbox" id="unique-only">
         <div class="page-size-container" id="page-size-container"></div>
       </div>
     </div>
@@ -385,7 +383,6 @@
       resultsEl.style.display = 'none';
     }
 
-    const pageSizeContainer = document.getElementById('page-size-container');
     const existingSelect = pageSizeContainer.querySelector('#page-size-select');
     if (items.length > 1 && !existingSelect) {
       pageSizeContainer.innerHTML = `ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option><option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option><option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option><option value="100" ${pageSize === 100 ? 'selected' : ''}>100</option></select>`;
@@ -461,6 +458,8 @@
     } else {
       paginationEl.style.display = 'none';
     }
+
+    uniqueCheckboxContainer.style.display = errorMessageEl.style.display === 'block' ? 'none' : 'flex';
 
     updateToTopVisibility();
 
