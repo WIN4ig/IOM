@@ -245,7 +245,7 @@
     const controlsHeight = controlsEl.getBoundingClientRect().height + parseFloat(getComputedStyle(controlsEl).marginTop) + parseFloat(getComputedStyle(controlsEl).marginBottom);
     const metaHeight = metaEl.getBoundingClientRect().height + parseFloat(getComputedStyle(metaEl).marginTop) + parseFloat(getComputedStyle(metaEl).marginBottom);
     const resultsHeight = resultsEl.offsetHeight > 0 ? resultsEl.getBoundingClientRect().height + parseFloat(getComputedStyle(resultsEl).marginBottom) : 0;
-    const paginationHeight = paginationEl.getBoundingClientRect().height;
+    const paginationHeight = paginationEl.offsetHeight > 0 ? paginationEl.getBoundingClientRect().height : 0;
 
     const totalHeightAbove = headerHeight + subHeight + controlsHeight + metaHeight + resultsHeight + paginationHeight;
 
@@ -340,11 +340,19 @@
           year = match[2];
         }
       }
+      // Format specialty: capitalize first letter and standardize separators
+      let specialtyDisplay = i.specialty || '—';
+      if (i.specialty) {
+        // Capitalize first letter
+        specialtyDisplay = i.specialty.charAt(0).toUpperCase() + i.specialty.slice(1);
+        // Replace "-" or " - " with " - "
+        specialtyDisplay = specialtyDisplay.replace(/\s*-\s*/g, ' - ');
+      }
       return `
         <div class="item" data-index="${index}">
           <div>
             <div class="iom">${iomTitle}</div>
-            <div class="pos"><span style="opacity:.6">Специальность:</span> ${i.specialty || '—'}</div>
+            <div class="pos"><span style="opacity:.6">Специальность:</span> ${specialtyDisplay}</div>
           </div>
           ${year ? `<div class="year">${year}</div>` : ''}
         </div>
