@@ -70,11 +70,15 @@
     .iom { 
       font-weight: 600; 
       font-size: 16px; 
-      flex: 1; 
-      min-width: 0;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      display: flex; /* Используем flex для точного выравнивания */
+      align-items: center; /* Вертикальное выравнивание */
+      gap: 4px; /* Минимальный отступ между текстом и иконкой */
+      flex-wrap: nowrap; /* Предотвращаем перенос */
+    }
+    .iom > span { /* Оборачиваем текст в span для контроля */
+      overflow: hidden; /* Обрезаем лишний текст */
+      text-overflow: ellipsis; /* Добавляем многоточие */
+      white-space: nowrap; /* Запрещаем перенос строк */
     }
     .pos { color: var(--muted); font-size: 14px; margin-top: 6px; }
     .year { 
@@ -398,7 +402,7 @@
         <div class="item" data-index="${index}">
           <div>
             <div class="iom">
-              ${iomTitle}
+              <span>${iomTitle}</span> <!-- Оборачиваем текст в span для стилизации -->
               <button class="copy-btn" data-iom="${i.iom}" title="Скопировать название ИОМ">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="2">
                   <rect x="3" y="8" width="13" height="13" rx="4" stroke="currentColor"></rect>
