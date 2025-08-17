@@ -72,13 +72,9 @@
       font-size: 16px; 
       flex: 1; 
       min-width: 0;
-      display: inline-flex; /* Возвращаем inline-flex для естественного обтекания */
+      display: inline-flex; /* Возвращаем базовое поведение */
       align-items: center;
-      position: relative; /* Для позиционирования иконки */
-    }
-    .iom > span { /* Оборачиваем текст для точного контроля */
-      display: inline-block; /* Позволяет обтекать иконку */
-      max-width: 100%; /* Ограничиваем ширину текста */
+      gap: 4px; /* Уменьшаем отступ для естественного вида */
     }
     .pos { color: var(--muted); font-size: 14px; margin-top: 6px; }
     .year { 
@@ -98,10 +94,6 @@
       width: 20px;
       height: 20px;
       transition: color 0.2s ease;
-      position: absolute; /* Позиционируем иконку относительно .iom */
-      right: 0; /* Прижимаем к правому краю текста */
-      top: 50%; /* Выравниваем по вертикали */
-      transform: translateY(-50%); /* Смещаем вверх на половину высоты для центрирования */
     }
     .copy-btn svg {
       color: var(--muted); /* Начальный цвет */
@@ -113,9 +105,9 @@
       animation: pop 0.25s ease;
     }
     @keyframes pop {
-      0%   { transform: scale(1) translateY(-50%); }
-      50%  { transform: scale(0.9) translateY(-50%); }
-      100% { transform: scale(1) translateY(-50%); }
+      0%   { transform: scale(1); }
+      50%  { transform: scale(0.9); }
+      100% { transform: scale(1); }
     }
     .error-message {
       margin: 12px 0;
