@@ -13,6 +13,7 @@
       --accent: #6aa9ff; 
       --shadow: rgba(0,0,0,0.2); 
       --border: #223048;
+      --white-border: #ffffff; /* Добавлен белый цвет для периметра */
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; height: 100%; }
@@ -94,7 +95,7 @@
       display: inline-block;
       width: var(--size);
       height: var(--size);
-      color: var(--muted);
+      color: var(--white-border); /* Белый периметр */
       cursor: pointer;
       transition: color 0.2s ease;
     }
@@ -106,10 +107,10 @@
       left: 15%;
       width: 70%;
       height: 75%;
-      border: var(--stroke) solid var(--muted);
+      border: var(--stroke) solid var(--white-border); /* Белый периметр */
       border-top-left-radius: 2px;
       border-top-right-radius: 2px;
-      background: transparent;
+      background: transparent; /* Прозрачная заливка */
     }
 
     .copy-btn::after {
@@ -119,15 +120,15 @@
       left: 25%;
       width: 50%;
       height: 10%;
-      border: var(--stroke) solid var(--muted);
+      border: var(--stroke) solid var(--white-border); /* Белый периметр */
       border-bottom: none;
       border-radius: 2px;
-      background: transparent;
+      background: transparent; /* Прозрачная заливка */
     }
 
-    /* Ховер — светлее */
+    /* Ховер — светлее белого */
     .copy-btn:hover {
-      color: #d1d9e6; /* Lighter shade for hover */
+      color: #f0f0f0; /* Чуть светлее белого для ховера */
     }
 
     /* Клик-анимация */
@@ -333,19 +334,19 @@
   // Sort and format specialties
   const uniqueSpecialties = [...new Set(raw.specialties.filter(s => s && typeof s === 'string'))];
   const sortedOptions = uniqueSpecialties
-    .sort((a, b) => a.localeCompare(b, 'ru-RU'))
     .map(s => {
       let formatted = s || '—';
       if (s) {
         formatted = s.charAt(0).toUpperCase() + s.slice(1);
         formatted = formatted.replace(/\s*-\s*/g, '-');
       }
-      return `<option value="${s}">${formatted}</option>`;
-    });
-  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.join('');
-  // Force re-render with a brief delay
+      return formatted;
+    })
+    .sort((a, b) => a.localeCompare(b, 'ru-RU'));
+  specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' - ')}">${s}</option>`).join('');
+  // Force re-render
   setTimeout(() => {
-    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.join(''); // Reapply to ensure sorting
+    specEl.innerHTML = `<option value="">Все специальности</option>` + sortedOptions.map(s => `<option value="${s.toLowerCase().replace('-', ' - ')}">${s}</option>`).join('');
     specEl.dispatchEvent(new Event('change'));
   }, 10);
 
