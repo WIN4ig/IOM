@@ -45,24 +45,13 @@
       justify-content: space-between; 
       align-items: center; 
       gap: 12px; 
-      min-height: 24px;
+      min-height: 24px; /* Reserve space for meta text */
     }
-    .meta-text { 
-      flex: 1; 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-      flex-wrap: wrap; 
-      line-height: 1.2;
-    }
-    .meta-text span { 
-      margin-right: 8px; 
-    }
+    .meta-text { flex: 1; }
     .page-size-container { 
       display: flex; 
       align-items: center; 
       gap: 5px; 
-      line-height: 1.2;
     }
     .results { font-size: 14px; color: var(--text); font-weight: bold; margin-bottom: 12px; display: none; }
     .list { 
@@ -156,6 +145,7 @@
       gap: 10px; 
       padding: 10px; 
       background: var(--bg); 
+      box-shadow: 0 -2px 4px var(--shadow); 
       z-index: 10; 
       position: fixed; 
       bottom: 0; 
@@ -191,22 +181,6 @@
       text-align: center; 
       padding: 8px 10px;
     }
-    .checkbox-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.2;
-    }
-    .checkbox-label input[type="checkbox"] {
-      width: 14px;
-      height: 14px;
-      accent-color: var(--accent);
-      cursor: pointer;
-      margin: 0;
-    }
 
     @media (max-width: 720px) {
       .controls { flex-direction: column; }
@@ -218,11 +192,9 @@
       .meta { 
         flex-direction: column; 
         align-items: flex-start; 
-        gap: 5px mł; 
+        gap: 5px; 
         min-height: 48px; 
       }
-      .meta-text { flex-wrap: wrap; gap: 8px; }
-      .meta-text span { margin-right: 6px; }
       .page-size-container { margin-top: 5px; }
       .page-size-select { 
         width: 80px; 
@@ -232,8 +204,6 @@
       .item { flex-direction: column; align-items: stretch; }
       .year { margin-left: 0; margin-top: 6px; align-self: flex-end; }
       .copy-btn { width: 18px; height: 18px; }
-      .checkbox-label { font-size: 12px; }
-      .checkbox-label input[type="checkbox"] { width: 12px; height: 12px; }
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -249,8 +219,6 @@
       }
       .year { font-size: 12px; padding: 3px 6px; }
       .copy-btn { width: 16px; height: 16px; }
-      .checkbox-label { font-size: 11px; }
-      .checkbox-label input[type="checkbox"] { width: 11px; height: 11px; }
     }
   </style>
 </head>
@@ -320,11 +288,6 @@
   pageSizeContainer.innerHTML = `ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select>`;
   pageSizeContainer.style.visibility = 'hidden';
 
-  // Initialize meta text with checkbox
-  const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
-  metaTextEl.innerHTML = `<span>${raw.items.length} записей • обновлено: ${d} • источник Минздрав</span><label class="checkbox-label" id="unique-checkbox-label" style="visibility: hidden;"><input type="checkbox" id="unique-checkbox"> Только уникальные</label>`;
-  metaTextEl.style.display = 'block';
-
   // Function to calculate and set list max-height
   function updateListMaxHeight() {
     const headerEl = document.querySelector('h1');
@@ -370,11 +333,6 @@
 
   loaderEl.style.display = 'none';
 
-  // Update meta text with actual data
-  const updatedDate = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
-  metaTextEl.innerHTML = `<span>${raw.items.length} записей • обновлено: ${updatedDate} • источник Минздрав</span><label class="checkbox-label" id="unique-checkbox-label" style="visibility: hidden;"><input type="checkbox" id="unique-checkbox"> Только уникальные</label>`;
-  metaTextEl.style.display = 'block';
-
   // Sort and format specialties
   const uniqueSpecialties = [...new Set(raw.specialties.filter(s => s && typeof s === 'string'))];
   const sortedOptions = uniqueSpecialties
@@ -394,6 +352,10 @@
     specEl.dispatchEvent(new Event('change'));
   }, 10);
 
+  const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
+  metaTextEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
+  metaTextEl.style.display = 'block';
+
   function updateToTopVisibility() {
     if (isDataLoaded && listEl.children.length > 0 && emptyMessageEl.style.display === 'none') {
       const hasScroll = listEl.scrollHeight > listEl.clientHeight;
@@ -409,8 +371,6 @@
   function render(page = 1) {
     const q = (searchEl.value || '').trim().toLowerCase();
     const spec = specEl.value;
-    const uniqueCheckboxLabel = document.getElementById('unique-checkbox-label');
-    
     let items = raw.items;
     if (spec) {
       const normalizedSpec = spec.toLowerCase().replace(/\s*-\s*/g, '-');
@@ -431,8 +391,6 @@
     resultsEl.textContent = `Найдено: ${items.length} ИОМ`;
 
     pageSizeContainer.style.visibility = items.length > 1 ? 'visible' : 'hidden';
-    uniqueCheckboxLabel.style.visibility = items.length > 1 ? 'visible' : 'hidden';
-
     const pageSizeSelect = document.getElementById('page-size-select');
     if (pageSizeSelect && pageSizeSelect.value != pageSize) {
       pageSizeSelect.value = pageSize;
