@@ -309,6 +309,8 @@
     if (!res.ok) throw new Error('HTTP ' + res.status);
     raw = await res.json();
     isDataLoaded = true;
+    console.log('Loaded specialties:', raw.specialties);
+    console.log('Loaded items with specialties:', raw.items.map(i => ({ iom: i.iom, specialty: i.specialty })));
   } catch (e) {
     listEl.innerHTML = '';
     errorMessageEl.style.display = 'block';
@@ -362,8 +364,9 @@
     const spec = specEl.value;
     let items = raw.items;
     if (spec) {
-      const normalizedSpec = spec.replace(/\s+/g, ' ').trim();
-      items = items.filter(i => i.specialty && i.specialty.toLowerCase().replace(/\s*-\s*/g, ' ').trim().includes(normalizedSpec));
+      const normalizedSpec = spec.replace(/\s+/g, ' ').trim().toLowerCase();
+      items = items.filter(i => i.specialty && i.specialty.toLowerCase().replace(/\s*-\s*/g, ' ').trim() === normalizedSpec);
+      console.log('Filtering for spec:', normalizedSpec, 'Found items:', items.length);
     }
     if (q) {
       items = items.filter(i =>
