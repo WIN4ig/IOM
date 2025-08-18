@@ -48,11 +48,13 @@
       min-height: 24px; /* Reserve space for meta text */
     }
     .meta-text { flex: 1; }
-    .page-size-container { 
+    .unique-checkbox-container, .page-size-container { 
       display: flex; 
       align-items: center; 
       gap: 5px; 
     }
+    .unique-checkbox-label, .page-size-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .unique-checkbox { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
     .results { font-size: 14px; color: var(--text); font-weight: bold; margin-bottom: 12px; display: none; }
     .list { 
       display: grid; 
@@ -193,14 +195,15 @@
         flex-direction: column; 
         align-items: flex-start; 
         gap: 5px; 
-        min-height: 48px; 
+        min-height: 72px; /* Adjusted for additional checkbox */
       }
-      .page-size-container { margin-top: 5px; }
+      .unique-checkbox-container, .page-size-container { margin-top: 5px; }
       .page-size-select { 
         width: 80px; 
         font-size: 13px; 
         padding: 6px 8px; 
       }
+      .unique-checkbox { width: 14px; height: 14px; }
       .item { flex-direction: column; align-items: stretch; }
       .year { margin-left: 0; margin-top: 6px; align-self: flex-end; }
       .copy-btn { width: 18px; height: 18px; }
@@ -219,6 +222,7 @@
       }
       .year { font-size: 12px; padding: 3px 6px; }
       .copy-btn { width: 16px; height: 16px; }
+      .unique-checkbox { width: 12px; height: 12px; }
     }
   </style>
 </head>
@@ -234,6 +238,10 @@
 
     <div class="meta" id="meta">
       <div class="meta-text" id="meta-text"></div>
+      <div class="unique-checkbox-container" id="unique-checkbox-container">
+        <input type="checkbox" id="unique-checkbox" class="unique-checkbox" checked>
+        <label for="unique-checkbox" class="unique-checkbox-label">Только уникальные</label>
+      </div>
       <div class="page-size-container" id="page-size-container"></div>
     </div>
     <div class="results" id="results"></div>
@@ -270,6 +278,8 @@
   const searchEl = document.getElementById('search');
   const metaEl = document.getElementById('meta');
   const metaTextEl = document.getElementById('meta-text');
+  const uniqueCheckboxContainer = document.getElementById('unique-checkbox-container');
+  const uniqueCheckbox = document.getElementById('unique-checkbox');
   const pageSizeContainer = document.getElementById('page-size-container');
   const resultsEl = document.getElementById('results');
   const loaderEl = document.getElementById('loader');
@@ -280,12 +290,15 @@
   const toTopBtn = document.getElementById('to-top');
 
   let raw = { items: [], specialties: [], updated_at: null };
+  let originalItems = [];
+  let aggregatedIoms = [];
   let currentPage = 1;
   let pageSize = 50;
   let isDataLoaded = false;
 
   // Initialize page size container
   pageSizeContainer.innerHTML = `ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select>`;
+  uniqueCheckboxContainer.style.visibility = 'hidden';
   pageSizeContainer.style.visibility = 'hidden';
 
   // Function to calculate and set list max-height
@@ -316,11 +329,13 @@
     const res = await fetch(dataUrl);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     raw = await res.json();
+    originalItems = raw.items;
     isDataLoaded = true;
   } catch (e) {
     listEl.innerHTML = '';
     errorMessageEl.style.display = 'block';
     metaTextEl.style.display = 'none';
+    uniqueCheckboxContainer.style.visibility = 'hidden';
     pageSizeContainer.style.visibility = 'hidden';
     resultsEl.style.display = 'none';
     console.error('Fetch error:', e);
@@ -332,6 +347,22 @@
   }
 
   loaderEl.style.display = 'none';
+
+  // Aggregate unique IOMs
+  function aggregateIoms() {
+    const iomMap = new Map();
+    originalItems.forEach(item => {
+      const key = item.iom;
+      if (!iomMap.has(key)) {
+        iomMap.set(key, { iom: key, specialties: new Set() });
+      }
+      if (item.specialty) {
+        iomMap.get(key).specialties.add(item.specialty);
+      }
+    });
+    aggregatedIoms = Array.from(iomMap.values()).map(obj => ({ ...obj, specialties: Array.from(obj.specialties) }));
+  }
+  aggregateIoms();
 
   // Sort and format specialties
   const uniqueSpecialties = [...new Set(raw.specialties.filter(s => s && typeof s === 'string'))];
@@ -353,7 +384,6 @@
   }, 10);
 
   const d = raw.updated_at ? new Date(raw.updated_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
-  metaTextEl.innerHTML = `${raw.items.length} записей • обновлено: ${d} • источник Минздрав`;
   metaTextEl.style.display = 'block';
 
   function updateToTopVisibility() {
@@ -371,26 +401,46 @@
   function render(page = 1) {
     const q = (searchEl.value || '').trim().toLowerCase();
     const spec = specEl.value;
-    let items = raw.items;
+    const isUnique = uniqueCheckbox.checked;
+    let source = isUnique ? aggregatedIoms : originalItems;
+    let items = [...source];
+
     if (spec) {
       const normalizedSpec = spec.toLowerCase().replace(/\s*-\s*/g, '-');
-      items = items.filter(i => {
-        const normalizedItemSpec = i.specialty ? i.specialty.toLowerCase().replace(/\s*-\s*/g, '-') : '';
-        return normalizedItemSpec === normalizedSpec;
-      });
+      if (isUnique) {
+        items = items.filter(i => i.specialties.some(s => {
+          const normalizedItemSpec = s ? s.toLowerCase().replace(/\s*-\s*/g, '-') : '';
+          return normalizedItemSpec === normalizedSpec;
+        }));
+      } else {
+        items = items.filter(i => {
+          const normalizedItemSpec = i.specialty ? i.specialty.toLowerCase().replace(/\s*-\s*/g, '-') : '';
+          return normalizedItemSpec === normalizedSpec;
+        });
+      }
     }
     if (q) {
-      items = items.filter(i =>
-        (i.iom && i.iom.toLowerCase().includes(q)) ||
-        (i.specialty && i.specialty.toLowerCase().includes(q))
-      );
+      items = items.filter(i => {
+        if (isUnique) {
+          return (i.iom && i.iom.toLowerCase().includes(q)) ||
+            i.specialties.some(s => s && s.toLowerCase().includes(q));
+        } else {
+          return (i.iom && i.iom.toLowerCase().includes(q)) ||
+            (i.specialty && i.specialty.toLowerCase().includes(q));
+        }
+      });
     }
+
+    // Update meta text
+    const totalCount = isUnique ? aggregatedIoms.length : originalItems.length;
+    metaTextEl.innerHTML = `${totalCount} записей • обновлено: ${d} • источник Минздрав`;
 
     // Update results display
     resultsEl.style.display = (q || spec) && items.length > 0 ? 'block' : 'none';
     resultsEl.textContent = `Найдено: ${items.length} ИОМ`;
 
-    pageSizeContainer.style.visibility = items.length > 1 ? 'visible' : 'hidden';
+    uniqueCheckboxContainer.style.visibility = items.length < 1 ? 'hidden' : 'visible';
+    pageSizeContainer.style.visibility = items.length > 10 ? 'visible' : 'hidden';
     const pageSizeSelect = document.getElementById('page-size-select');
     if (pageSizeSelect && pageSizeSelect.value != pageSize) {
       pageSizeSelect.value = pageSize;
@@ -422,10 +472,13 @@
         }
         iomTitle = iomTitle.replace(/\(по утвержденным клиническим рекомендациям\)/i, '').trim();
       }
-      let specialtyDisplay = i.specialty || '—';
-      if (i.specialty) {
-        specialtyDisplay = i.specialty.charAt(0).toUpperCase() + i.specialty.slice(1);
-        specialtyDisplay = specialtyDisplay.replace(/\s*-\s*/g, '-');
+      let specialtyDisplay = '';
+      if (!isUnique) {
+        specialtyDisplay = i.specialty || '—';
+        if (i.specialty) {
+          specialtyDisplay = i.specialty.charAt(0).toUpperCase() + i.specialty.slice(1);
+          specialtyDisplay = specialtyDisplay.replace(/\s*-\s*/g, '-');
+        }
       }
       return `
         <div class="item" data-index="${index}">
@@ -439,7 +492,7 @@
                 </svg>
               </button>
             </div>
-            <div class="pos"><span style="opacity:.6">Специальность:</span> ${specialtyDisplay}</div>
+            ${!isUnique ? `<div class="pos"><span style="opacity:.6">Специальность:</span> ${specialtyDisplay}</div>` : ''}
           </div>
           ${year ? `<div class="year">${year}</div>` : ''}
         </div>
@@ -483,6 +536,7 @@
 
   specEl.addEventListener('change', () => { currentPage = 1; render(); });
   searchEl.addEventListener('input', () => { currentPage = 1; render(); });
+  uniqueCheckbox.addEventListener('change', () => { currentPage = 1; render(); });
   prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; render(currentPage); } });
   nextBtn.addEventListener('click', () => { currentPage++; render(currentPage); });
 
