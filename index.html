@@ -46,9 +46,14 @@
       justify-content: space-between; 
       align-items: center; 
       gap: 12px; 
-      min-height: 24px; /* Reserve space for meta text */
+      min-height: 24px;
     }
-    .meta-text { flex: 1; }
+    .meta-text { flex: 1; text-align: left; }
+    .meta-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
     .unique-checkbox-container, .page-size-container { 
       display: flex; 
       align-items: center; 
@@ -65,7 +70,7 @@
       scrollbar-color: var(--muted) var(--card); 
       flex: unset;
       min-height: auto;
-      padding-top: 4px; /* Добавлено для предотвращения вылезания */
+      padding-top: 4px;
     } 
     .list::-webkit-scrollbar { width: 8px; }
     .list::-webkit-scrollbar-track { background: var(--card); border-radius: 4px; }
@@ -104,6 +109,22 @@
       border-radius: 8px; 
       margin-left: 10px; 
       white-space: nowrap; 
+    }
+    .iom-number {
+      font-size: 13px; 
+      color: var(--muted); 
+      background: var(--border); 
+      padding: 4px 8px; 
+      border-radius: 8px; 
+      margin-left: 10px; 
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .meta-right {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
     }
     .copy-btn {
       background: none;
@@ -204,6 +225,25 @@
     .orientation-message.visible {
       display: flex;
     }
+    .notification {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px var(--shadow);
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 100;
+      border: 1px solid #fff;
+    }
+    .notification.visible {
+      opacity: 1;
+    }
 
     @media (max-width: 720px) {
       .controls { flex-direction: column; }
@@ -214,11 +254,18 @@
       .to-top { bottom: 80px; right: 12px; width: 36px; height: 36px; }
       .meta { 
         flex-direction: column; 
-        align-items: flex-start; 
-        gap: 5px; 
-        min-height: 72px; /* Adjusted for additional checkbox */
+        gap: 8px; 
+        min-height: 48px;
       }
-      .unique-checkbox-container, .page-size-container { margin-top: 5px; }
+      .meta-controls {
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .meta-text { flex: 1; text-align: left; }
+      .unique-checkbox-container, .page-size-container { margin-top: 0; }
       .page-size-select { 
         width: 80px; 
         font-size: 13px; 
@@ -226,8 +273,14 @@
       }
       .unique-checkbox { width: 14px; height: 14px; }
       .item { flex-direction: column; align-items: stretch; }
-      .year { margin-left: 0; margin-top: 6px; align-self: flex-end; }
+      .meta-right {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .year, .iom-number { margin-left: 0; margin-top: 6px; }
       .copy-btn { width: 18px; height: 18px; }
+      .notification { bottom: 70px; font-size: 13px; }
     }
     @media (max-width: 480px) {
       body { font-size: 14px; }
@@ -241,9 +294,10 @@
         font-size: 12px; 
         padding: 5px 7px;
       }
-      .year { font-size: 12px; padding: 3px 6px; }
+      .year, .iom-number { font-size: 12px; padding: 3px 6px; }
       .copy-btn { width: 16px; height: 16px; }
       .unique-checkbox { width: 12px; height: 12px; }
+      .notification { bottom: 65px; font-size: 12px; }
     }
     @media (orientation: landscape) and (max-width: 1024px) {
       .orientation-message {
@@ -271,11 +325,13 @@
 
     <div class="meta" id="meta">
       <div class="meta-text" id="meta-text"></div>
-      <div class="unique-checkbox-container" id="unique-checkbox-container">
-        <input type="checkbox" id="unique-checkbox" class="unique-checkbox" checked>
-        <label for="unique-checkbox" class="unique-checkbox-label">Только уникальные</label>
+      <div class="meta-controls">
+        <div class="unique-checkbox-container" id="unique-checkbox-container">
+          <input type="checkbox" id="unique-checkbox" class="unique-checkbox" checked>
+          <label for="unique-checkbox" class="unique-checkbox-label">Только уникальные</label>
+        </div>
+        <div class="page-size-container" id="page-size-container"></div>
       </div>
-      <div class="page-size-container" id="page-size-container"></div>
     </div>
     <div class="results" id="results"></div>
     <div id="error-message" class="error-message error" style="display: none;">
@@ -284,7 +340,6 @@
     <div id="empty-message" class="error-message empty" style="display: none;">
       Ничего не найдено. Измените фильтры или поиск.
     </div>
-
     <div id="list" class="list"></div>
     <div id="loader" class="loader" style="display:none">Загрузка данных...</div>
   </div>
@@ -333,6 +388,23 @@
   pageSizeContainer.innerHTML = `ИОМ на странице: <select id="page-size-select" class="page-size-select"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select>`;
   uniqueCheckboxContainer.style.visibility = 'hidden';
   pageSizeContainer.style.visibility = 'hidden';
+
+  // Function to show notification
+  function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      notification.classList.add('visible');
+      setTimeout(() => {
+        notification.classList.remove('visible');
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }, 2000);
+    }, 10);
+  }
 
   // Function to calculate and set list max-height
   function updateListMaxHeight() {
@@ -387,7 +459,7 @@
     originalItems.forEach(item => {
       const key = item.iom;
       if (!iomMap.has(key)) {
-        iomMap.set(key, { iom: key, specialties: new Set() });
+        iomMap.set(key, { iom: key, specialties: new Set(), iom_number: item.iom_number });
       }
       if (item.specialty) {
         iomMap.get(key).specialties.add(item.specialty);
@@ -517,6 +589,7 @@
     listEl.innerHTML = paginatedItems.map((i, index) => {
       let iomTitle = i.iom || '—';
       let year = '';
+      let iomNumber = i.iom_number || '—';
       if (i.iom) {
         const match = i.iom.match(/^(.*?)(?:(?:\s*-\s*|-)|\s)(\d{4})$/);
         if (match) {
@@ -547,16 +620,31 @@
             </div>
             ${!isUnique ? `<div class="pos"><span style="opacity:.6">Специальность:</span> ${specialtyDisplay}</div>` : ''}
           </div>
-          ${year ? `<div class="year">${year}</div>` : ''}
+          <div class="meta-right">
+            ${year ? `<div class="year">${year}</div>` : ''}
+            ${iomNumber ? `<div class="iom-number" data-iom-number="${iomNumber}">${iomNumber}</div>` : ''}
+          </div>
         </div>
       `;
     }).join('');
 
-    // Add event listeners for copy buttons
+    // Add event listeners for copy buttons and iom-number
     document.querySelectorAll('.copy-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const iomText = btn.getAttribute('data-iom');
-        navigator.clipboard.writeText(iomText).catch(err => {
+        navigator.clipboard.writeText(iomText).then(() => {
+          showNotification('Название ИОМа скопировано');
+        }).catch(err => {
+          console.error('Ошибка копирования:', err);
+        });
+      });
+    });
+    document.querySelectorAll('.iom-number').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const iomNumber = btn.getAttribute('data-iom-number');
+        navigator.clipboard.writeText(iomNumber).then(() => {
+          showNotification('Номер ИОМа скопирован');
+        }).catch(err => {
           console.error('Ошибка копирования:', err);
         });
       });
