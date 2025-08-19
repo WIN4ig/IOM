@@ -30,8 +30,19 @@ jobs:
           import json
           import requests
           from io import BytesIO
-          import datetime  # Для updated_at
+          import datetime
 
+          # Скачиваем текущий matrix.json для сравнения
+          existing_url = "https://raw.githubusercontent.com/WIN4ig/IOM/refs/heads/main/data/matrix.json"
+          try:
+              existing_r = requests.get(existing_url)
+              existing_r.raise_for_status()
+              existing_data = existing_r.json()
+              existing_items = {(item["iom"], item["specialty"]) for item in existing_data["items"]}
+          except:
+              existing_items = set()
+
+          # Скачиваем Excel
           url = "https://static.edu.rosminzdrav.ru/portal/common/instructions/Matrix_IOM-CR-dolgnost-.xlsx"
           r = requests.get(url)
           r.raise_for_status()
@@ -47,20 +58,23 @@ jobs:
           col_num = columns.index("Номер ИОМ-КР")
           col_iom = columns.index("Название ИОМ-КР/Должность")
 
-          # Пропускаем ненужные колонки, включая "Применение" (не специальность)
+          # Пропускаем ненужные колонки
           skip_cols = ("Применение", "Номер ИОМ-КР", "Название ИОМ-КР/Должность", "Дата начала предоставления доступа")
 
           for idx, row in xls.iterrows():
               iom_name = str(row[col_iom]).strip() if pd.notna(row[col_iom]) else ""
+              iom_number = str(row[col_num]).strip() if pd.notna(row[col_num]) else ""
               for col in columns:
                   if col in skip_cols:
                       continue
                   if isinstance(col, str) and col.strip() != "" and pd.notna(row[col]):
                       clean_col = col.strip().lstrip("*")
+                      is_new = (iom_name, clean_col) not in existing_items
                       result.append({
                           "specialty": clean_col,
                           "iom": iom_name,
-                          "position": clean_col
+                          "iom_number": iom_number,
+                          "is_new": is_new
                       })
 
           # Вычисляем уникальные специальности (отсортированные)
