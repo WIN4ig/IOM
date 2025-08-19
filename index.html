@@ -37,6 +37,7 @@
     .controls { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0 12px; }
     .input, select { flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 12px; outline: none; transition: border 0.2s; }
     .input:focus, select:focus { border-color: var(--accent); }
+    .input:disabled { opacity: 0.5; cursor: not-allowed; }
     .meta { 
       font-size: 13px; 
       color: var(--muted); 
@@ -365,6 +366,18 @@
   }
   aggregateIoms();
 
+  // Sort items by year in descending order
+  function sortByYear(items) {
+    return items.sort((a, b) => {
+      const yearA = a.iom && a.iom.match(/\d{4}$/) ? parseInt(a.iom.match(/\d{4}$/)[0], 10) : 0;
+      const yearB = b.iom && b.iom.match(/\d{4}$/) ? parseInt(b.iom.match(/\d{4}$/)[0], 10) : 0;
+      return yearB - yearA;
+    });
+  }
+
+  originalItems = sortByYear(originalItems);
+  aggregatedIoms = sortByYear(aggregatedIoms);
+
   // Sort and format specialties
   const uniqueSpecialties = [...new Set(raw.specialties.filter(s => s && typeof s === 'string'))];
   const sortedOptions = uniqueSpecialties
@@ -402,9 +415,16 @@
   function render(page = 1) {
     const q = (searchEl.value || '').trim().toLowerCase();
     const spec = specEl.value;
-    const isUnique = uniqueCheckbox.checked;
+    const isUnique = spec ? true : uniqueCheckbox.checked;
     let source = isUnique ? aggregatedIoms : originalItems;
     let items = [...source];
+
+    // Update unique checkbox visibility based on specialty selection
+    if (spec) {
+      uniqueCheckboxContainer.style.display = 'none';
+    } else {
+      uniqueCheckboxContainer.style.display = 'flex';
+    }
 
     if (spec) {
       const normalizedSpec = spec.toLowerCase().replace(/\s*-\s*/g, '-');
@@ -422,12 +442,13 @@
     }
     if (q) {
       items = items.filter(i => {
+        const searchBySpecialty = !spec;
         if (isUnique) {
           return (i.iom && i.iom.toLowerCase().includes(q)) ||
-            i.specialties.some(s => s && s.toLowerCase().includes(q));
+            (searchBySpecialty && i.specialties.some(s => s && s.toLowerCase().includes(q)));
         } else {
           return (i.iom && i.iom.toLowerCase().includes(q)) ||
-            (i.specialty && i.specialty.toLowerCase().includes(q));
+            (searchBySpecialty && (i.specialty && i.specialty.toLowerCase().includes(q)));
         }
       });
     }
@@ -535,7 +556,10 @@
     listEl.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  specEl.addEventListener('change', () => { currentPage = 1; render(); });
+  specEl.addEventListener('change', () => { 
+    currentPage = 1; 
+    render(); 
+  });
   searchEl.addEventListener('input', () => { currentPage = 1; render(); });
   uniqueCheckbox.addEventListener('change', () => { currentPage = 1; render(); });
   prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; render(currentPage); } });
