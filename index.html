@@ -185,6 +185,25 @@
       text-align: center; 
       padding: 8px 10px;
     }
+    .orientation-message {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      color: var(--text);
+      font-size: 18px;
+      text-align: center;
+      padding: 20px;
+    }
+    .orientation-message.visible {
+      display: flex;
+    }
 
     @media (max-width: 720px) {
       .controls { flex-direction: column; }
@@ -226,9 +245,21 @@
       .copy-btn { width: 16px; height: 16px; }
       .unique-checkbox { width: 12px; height: 12px; }
     }
+    @media (orientation: landscape) and (max-width: 1024px) {
+      .orientation-message {
+        display: flex;
+      }
+      .wrap, .pagination, .to-top {
+        pointer-events: none;
+        opacity: 0.3;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="orientation-message" id="orientation-message">
+    Пожалуйста, используйте устройство в вертикальном режиме.
+  </div>
   <div class="wrap">
     <h1>Рубрикатор: ИОМ-КР / Должности</h1>
     <div class="sub">Выберите врачебную специальность или воспользуйтесь поиском по специальности/ИОМ</div>
