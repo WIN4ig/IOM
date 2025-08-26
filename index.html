@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Рубрикатор ИОМ-КР / Должности</title>
   <style>
     :root { 
@@ -548,9 +548,11 @@
         const searchBySpecialty = !spec;
         if (isUnique) {
           return (i.iom && i.iom.toLowerCase().includes(q)) ||
+            (i.iom_number && i.iom_number.toLowerCase().includes(q)) ||
             (searchBySpecialty && i.specialties.some(s => s && s.toLowerCase().includes(q)));
         } else {
           return (i.iom && i.iom.toLowerCase().includes(q)) ||
+            (i.iom_number && i.iom_number.toLowerCase().includes(q)) ||
             (searchBySpecialty && (i.specialty && i.specialty.toLowerCase().includes(q)));
         }
       });
