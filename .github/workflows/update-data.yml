@@ -14,7 +14,7 @@ jobs:
       - name: Клонирование репозитория
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }} # Используем GITHUB_TOKEN для аутентификации
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Установка Python
         uses: actions/setup-python@v4
@@ -31,34 +31,35 @@ jobs:
           import requests
           from io import BytesIO
           import datetime
+          import os
 
-          # Скачиваем текущий matrix.json для сравнения
           existing_url = "https://raw.githubusercontent.com/WIN4ig/IOM/refs/heads/main/data/matrix.json"
           try:
               existing_r = requests.get(existing_url)
               existing_r.raise_for_status()
               existing_data = existing_r.json()
-              existing_items = {(item["iom"], item["specialty"]) for item in existing_data["items"]}
-          except:
-              existing_items = set()
 
-          # Скачиваем Excel
+              # Сохраняем пары (iom, specialty) для всех записей и отдельно для is_new=true
+              existing_all_items = {(item["iom"], item["specialty"]) for item in existing_data["items"]}
+              existing_new_items = {(item["iom"], item["specialty"]) for item in existing_data["items"] if item.get("is_new", False)}
+
+          except:
+              existing_all_items = set()
+              existing_new_items = set()
+
           url = "https://static.edu.rosminzdrav.ru/portal/common/instructions/Matrix_IOM-CR-dolgnost-.xlsx"
           r = requests.get(url)
           r.raise_for_status()
 
-          # Читаем Excel, вторая строка — заголовки
           xls = pd.read_excel(BytesIO(r.content), sheet_name=0, header=1)
           xls.dropna(how="all", inplace=True)
 
           result = []
           columns = list(xls.columns)
 
-          # Индексы основных колонок
           col_num = columns.index("Номер ИОМ-КР")
           col_iom = columns.index("Название ИОМ-КР/Должность")
 
-          # Пропускаем ненужные колонки
           skip_cols = ("Применение", "Номер ИОМ-КР", "Название ИОМ-КР/Должность", "Дата начала предоставления доступа")
 
           for idx, row in xls.iterrows():
@@ -69,7 +70,13 @@ jobs:
                       continue
                   if isinstance(col, str) and col.strip() != "" and pd.notna(row[col]):
                       clean_col = col.strip().lstrip("*")
-                      is_new = (iom_name, clean_col) not in existing_items
+
+                      key = (iom_name, clean_col)
+                      # Установка is_new: если раньше была true - остается true
+                      # если это новая пара (отсутствует в all_items) - true
+                      # иначе false
+                      is_new = key in existing_new_items or key not in existing_all_items
+
                       result.append({
                           "specialty": clean_col,
                           "iom": iom_name,
@@ -77,18 +84,14 @@ jobs:
                           "is_new": is_new
                       })
 
-          # Вычисляем уникальные специальности (отсортированные)
           specialties = sorted(set(item["specialty"] for item in result if item["specialty"]))
 
-          # Формируем объект для JSON
           data = {
               "items": result,
               "specialties": specialties,
               "updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
           }
 
-          # Сохраняем JSON
-          import os
           os.makedirs("data", exist_ok=True)
           with open("data/matrix.json", "w", encoding="utf-8") as f:
               json.dump(data, f, ensure_ascii=False, indent=2)
@@ -113,7 +116,7 @@ jobs:
           git fetch origin
           if git show-ref --quiet refs/heads/gh-pages; then
             git checkout gh-pages
-            git merge main --no-edit --allow-unrelated-histories || true  # Объединяем изменения из main
+            git merge main --no-edit --allow-unrelated-histories || true
             git add -A
             git commit -m "Синхронизация matrix.json с main" || echo "Нет изменений для коммита"
             git push origin gh-pages
