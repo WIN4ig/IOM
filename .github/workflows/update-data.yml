@@ -63,8 +63,8 @@ jobs:
           skip_cols = ("Применение", "Номер ИОМ-КР", "Название ИОМ-КР/Должность", "Дата начала предоставления доступа")
 
           for idx, row in xls.iterrows():
-              iom_name = str(row[col_iom]).strip() if pd.notna(row[col_iom]) else ""
-              iom_number = str(row[col_num]).strip() if pd.notna(row[col_num]) else ""
+              iom_name = str(row.iloc[col_iom]).strip() if pd.notna(row.iloc[col_iom]) else ""
+              iom_number = str(row.iloc[col_num]).strip() if pd.notna(row.iloc[col_num]) else ""
               for col in columns:
                   if col in skip_cols:
                       continue
