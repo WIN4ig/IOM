@@ -562,7 +562,6 @@
     if (totalInFilter === 0 || resultsEl.style.display === 'none') return;
     resultsEl.innerHTML = `<span>Найдено: ${totalInFilter} ИОМ</span><span>Выполнено: ${completedInTotal} ИОМ</span>`;
   }
-
   loaderEl.style.display = 'block';
   try {
     const res = await fetch(dataUrl);
@@ -702,7 +701,7 @@
     }
   }
 
-  function render(page = 1) {
+  function render(page = 1, resetScroll = true) {
     const q = (searchEl.value || '').trim().toLowerCase();
     const spec = specEl.value;
     const isUnique = spec ? true : uniqueCheckbox.checked;
@@ -759,7 +758,6 @@
       newCheckbox.checked = false;
       showNewOnly = false;
     }
-
     // Применяем фильтр только новые после вычисления base
     if (showNewOnly) {
       items = items.filter(item => item.is_new);
@@ -807,7 +805,6 @@
       });
       pageSizeSelect._hasChangeListener = true;
     }
-
     const totalPages = Math.ceil(items.length / pageSize);
     if (currentPage > totalPages) {
       currentPage = Math.max(1, totalPages);
@@ -910,7 +907,14 @@
           setState(key, true, true); // Устанавливаем зелёный, если не был установлен
         }
         // Если уже установлен, ничего не делаем (не снимаем)
-        render(currentPage);
+        render(currentPage, false);
+        // Прокрутка к элементу после обновления
+        setTimeout(() => {
+          const clickedItem = document.querySelector(`.item-check[data-key="${key}"]`)?.closest('.item');
+          if (clickedItem) {
+            clickedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }
+        }, 100);
       });
     });
 
@@ -939,7 +943,14 @@
           otherChk.checked = finalState.checked;
           otherChk.classList.toggle('via-label', finalState.viaLabel);
         });
-        render(currentPage);
+        render(currentPage, false);
+        // Прокрутка к элементу после обновления
+        setTimeout(() => {
+          const clickedItem = document.querySelector(`.item-check[data-key="${key}"]`)?.closest('.item');
+          if (clickedItem) {
+            clickedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }
+        }, 100);
       });
       chk.addEventListener('click', (e) => e.stopPropagation());
       chk.addEventListener('pointerup', (e) => e.stopPropagation());
@@ -987,7 +998,6 @@
         emptyMessageEl.innerHTML = `Ничего не найдено. Измените фильтры или поиск.`;
       }
     }
-
     if (errorMessageEl.style.display === 'block' || emptyMessageEl.style.display === 'block') {
       document.getElementById('pagination').style.display = 'none';
     } else if (totalPages > 1) {
@@ -1000,7 +1010,9 @@
     }
 
     updateToTopVisibility();
-    listEl.scrollTop = 0;
+    if (resetScroll) {
+      listEl.scrollTop = 0;
+    }
     setTimeout(updateListMaxHeight, 0);
   }
 
